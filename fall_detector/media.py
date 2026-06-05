@@ -10,6 +10,11 @@ import cv2
 import numpy as np
 
 from .detector import DetectionResult, PoseFallDetector
+from .postprocess import BedROI, FallPostProcessor
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+BED_ROI_CONFIG = PROJECT_ROOT / "bed_roi.json"
 
 
 @dataclass(frozen=True)
@@ -76,6 +81,7 @@ def process_video(
     device: str,
     cancelled: Event,
     on_preview: Callable[[DetectionResult, int, int], None] | None = None,
+    bed_roi: BedROI | None = None,
 ) -> ProcessedMedia:
     capture = cv2.VideoCapture(str(source))
     if not capture.isOpened():
@@ -85,6 +91,9 @@ def process_video(
     fps = fps if fps and fps > 0 else 25.0
     total_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
     output_path = create_output_path(output_directory, source, ".mp4")
+    postprocessor = FallPostProcessor(
+        fps=fps, bed_roi=bed_roi if bed_roi is not None else BedROI.load(BED_ROI_CONFIG)
+    )
     writer = None
     detection_count = 0
     fall_found = False
@@ -96,6 +105,7 @@ def process_video(
             if not ok:
                 break
             result = detector.predict(frame, imgsz=imgsz, conf=conf, device=device)
+            result = postprocessor.apply(result)
             if writer is None:
                 height, width = result.annotated_frame.shape[:2]
                 writer = cv2.VideoWriter(

@@ -22,12 +22,32 @@ class ModelInfo:
 
 
 @dataclass
+class PoseDetection:
+    class_id: int
+    confidence: float
+    box_xyxy: tuple[float, float, float, float]
+    keypoints: list[tuple[float, float]] | None = None
+
+
+@dataclass
+class PostprocessStatus:
+    state: str
+    raw_has_fall: bool
+    smoothed_fall: bool
+    sudden_drop: bool
+    inside_bed_roi: bool
+    still: bool
+
+
+@dataclass
 class DetectionResult:
     annotated_frame: Any
     has_detection: bool
     has_fall: bool
     detection_count: int
     warning: str | None = None
+    detections: list[PoseDetection] | None = None
+    postprocess: PostprocessStatus | None = None
 
 
 def _normalized_names(raw_names: Any) -> dict[int, str]:
@@ -136,16 +156,15 @@ class PoseFallDetector:
                 except Exception as retry_exc:
                     raise InferenceError(f"Lỗi nhận diện: {retry_exc}") from retry_exc
 
-        boxes = getattr(result, "boxes", None)
-        classes = []
-        if boxes is not None and getattr(boxes, "cls", None) is not None:
-            classes = [int(value) for value in boxes.cls.cpu().tolist()]
+        detections = self._extract_detections(result)
+        classes = [detection.class_id for detection in detections]
         return DetectionResult(
             annotated_frame=result.plot(boxes=True, labels=True, kpt_line=True),
             has_detection=bool(classes),
             has_fall=1 in classes,
             detection_count=len(classes),
             warning=warning,
+            detections=detections,
         )
 
     def _predict_frame(
@@ -157,3 +176,42 @@ class PoseFallDetector:
         if not results:
             raise InferenceError("Model không trả về kết quả.")
         return results[0]
+
+    def _extract_detections(self, result: Any) -> list[PoseDetection]:
+        boxes = getattr(result, "boxes", None)
+        if boxes is None or getattr(boxes, "cls", None) is None:
+            return []
+
+        classes = [int(value) for value in boxes.cls.cpu().tolist()]
+        confidences = (
+            [float(value) for value in boxes.conf.cpu().tolist()]
+            if getattr(boxes, "conf", None) is not None
+            else [0.0] * len(classes)
+        )
+        coordinates = (
+            boxes.xyxy.cpu().tolist()
+            if getattr(boxes, "xyxy", None) is not None
+            else [[0.0, 0.0, 0.0, 0.0] for _ in classes]
+        )
+
+        keypoints_xy: list[list[tuple[float, float]] | None] = [None] * len(classes)
+        keypoints = getattr(result, "keypoints", None)
+        if keypoints is not None and getattr(keypoints, "xy", None) is not None:
+            raw_keypoints = keypoints.xy.cpu().tolist()
+            keypoints_xy = [
+                [(float(point[0]), float(point[1])) for point in person]
+                for person in raw_keypoints
+            ]
+
+        detections: list[PoseDetection] = []
+        for index, class_id in enumerate(classes):
+            x1, y1, x2, y2 = coordinates[index]
+            detections.append(
+                PoseDetection(
+                    class_id=class_id,
+                    confidence=confidences[index],
+                    box_xyxy=(float(x1), float(y1), float(x2), float(y2)),
+                    keypoints=keypoints_xy[index] if index < len(keypoints_xy) else None,
+                )
+            )
+        return detections

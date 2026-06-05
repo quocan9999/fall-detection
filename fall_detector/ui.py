@@ -1,17 +1,19 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from queue import Empty, Queue
 from threading import Event, Thread
 from typing import Any
 
 import cv2
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtGui import QCloseEvent, QImage, QPixmap
+from PySide6.QtCore import QPointF, QRect, QRectF, Qt, QTimer
+from PySide6.QtGui import QColor, QCloseEvent, QImage, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
+    QDialog,
     QFileDialog,
     QGridLayout,
     QGroupBox,
@@ -32,6 +34,7 @@ from .alarm import FallAlarm
 from .camera import CameraWorker
 from .detector import DetectionResult, ModelInfo, PoseFallDetector
 from .media import find_camera_indices, process_image, process_video
+from .postprocess import BedROI
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -39,22 +42,151 @@ OUTPUTS_ROOT = PROJECT_ROOT / "outputs"
 DEFAULT_MODEL = PROJECT_ROOT / "weights" / "best.pt"
 IMAGE_OUTPUTS = PROJECT_ROOT / "outputs" / "images"
 VIDEO_OUTPUTS = PROJECT_ROOT / "outputs" / "videos"
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp"}
+VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv"}
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, on_close: Any) -> None:
+    def __init__(self, on_close: Any, on_files_dropped: Any) -> None:
         super().__init__()
         self._on_close = on_close
+        self._on_files_dropped = on_files_dropped
+        self.setAcceptDrops(True)
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self._on_close()
         super().closeEvent(event)
 
+    def dragEnterEvent(self, event: Any) -> None:
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event: Any) -> None:
+        paths = [
+            Path(url.toLocalFile())
+            for url in event.mimeData().urls()
+            if url.isLocalFile()
+        ]
+        if paths:
+            self._on_files_dropped(paths)
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+
+class RoiCanvas(QWidget):
+    def __init__(self, frame: Any, on_change: Any) -> None:
+        super().__init__()
+        self.on_change = on_change
+        self.points: list[tuple[float, float]] = []
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        qimage = QImage(
+            rgb.data, rgb.shape[1], rgb.shape[0], rgb.strides[0], QImage.Format.Format_RGB888
+        ).copy()
+        self.pixmap = QPixmap.fromImage(qimage)
+        self.setMinimumSize(720, 480)
+
+    def reset(self) -> None:
+        self.points.clear()
+        self.update()
+        self.on_change()
+
+    def mousePressEvent(self, event: Any) -> None:
+        if len(self.points) >= 4:
+            return
+        rect = self._image_rect()
+        position = event.position()
+        if not rect.contains(position.toPoint()):
+            return
+        x = (position.x() - rect.left()) / max(rect.width(), 1)
+        y = (position.y() - rect.top()) / max(rect.height(), 1)
+        self.points.append((max(0.0, min(1.0, x)), max(0.0, min(1.0, y))))
+        self.update()
+        self.on_change()
+
+    def paintEvent(self, _event: Any) -> None:
+        painter = QPainter(self)
+        painter.fillRect(self.rect(), QColor("#202124"))
+        rect = self._image_rect()
+        painter.drawPixmap(rect, self.pixmap)
+
+        if not self.points:
+            return
+
+        pixel_points = [
+            QPointF(rect.left() + x * rect.width(), rect.top() + y * rect.height())
+            for x, y in self.points
+        ]
+        pen = QPen(QColor("#ffb000"), 3)
+        painter.setPen(pen)
+        for index, point in enumerate(pixel_points):
+            painter.setBrush(QColor("#ffb000"))
+            painter.drawEllipse(QRectF(point.x() - 5, point.y() - 5, 10, 10))
+            painter.drawText(point + QPointF(8, -8), str(index + 1))
+            if index > 0:
+                painter.drawLine(pixel_points[index - 1], point)
+        if len(pixel_points) == 4:
+            painter.drawLine(pixel_points[-1], pixel_points[0])
+
+    def _image_rect(self) -> QRect:
+        scaled = self.pixmap.size().scaled(
+            self.size(), Qt.AspectRatioMode.KeepAspectRatio
+        )
+        left = (self.width() - scaled.width()) // 2
+        top = (self.height() - scaled.height()) // 2
+        return QRect(left, top, scaled.width(), scaled.height())
+
+
+class BedRoiDialog(QDialog):
+    def __init__(self, frame: Any, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Chon 4 diem quanh giuong")
+        self.selected_roi: BedROI | None = None
+        self.resize(900, 650)
+
+        layout = QVBoxLayout(self)
+        hint = QLabel("Click 4 diem quanh giuong theo thu tu. Bam Skip ROI neu khong muon dung vung giuong.")
+        hint.setWordWrap(True)
+        layout.addWidget(hint)
+
+        self.canvas = RoiCanvas(frame, self._update_buttons)
+        layout.addWidget(self.canvas, stretch=1)
+
+        actions = QHBoxLayout()
+        self.use_button = QPushButton("Use 4 points")
+        self.use_button.clicked.connect(self._use_points)
+        self.use_button.setEnabled(False)
+        actions.addWidget(self.use_button)
+
+        reset_button = QPushButton("Reset")
+        reset_button.clicked.connect(self.canvas.reset)
+        actions.addWidget(reset_button)
+
+        skip_button = QPushButton("Skip ROI")
+        skip_button.clicked.connect(self.accept)
+        actions.addWidget(skip_button)
+
+        cancel_button = QPushButton("Cancel")
+        cancel_button.clicked.connect(self.reject)
+        actions.addWidget(cancel_button)
+        layout.addLayout(actions)
+
+    def _update_buttons(self) -> None:
+        self.use_button.setEnabled(len(self.canvas.points) == 4)
+
+    def _use_points(self) -> None:
+        if len(self.canvas.points) != 4:
+            return
+        self.selected_roi = BedROI(enabled=True, points=tuple(self.canvas.points))
+        self.accept()
+
 
 class FallDetectionApp:
     def __init__(self) -> None:
         self.qt_app = QApplication.instance() or QApplication([])
-        self.window = MainWindow(self._shutdown)
+        self.window = MainWindow(self._shutdown, self._handle_dropped_files)
         self.window.setWindowTitle("Fall Detection - YOLO Pose")
         self.window.resize(1280, 820)
         self.window.setMinimumSize(1040, 700)
@@ -202,6 +334,107 @@ class FallDetectionApp:
             self.device_combo.currentText(),
         )
 
+    def _model_output_name(self) -> str:
+        info = self.detector.info
+        stem = info.path.stem if info is not None else "unknown-model"
+        name = re.sub(r"[^A-Za-z0-9]+", "-", stem).strip("-").lower()
+        if not name:
+            return "unknown-model"
+        return name if name.endswith("-pt") else f"{name}-pt"
+
+    def _image_output_directory(self) -> Path:
+        return IMAGE_OUTPUTS / self._model_output_name()
+
+    def _video_output_directory(self) -> Path:
+        return VIDEO_OUTPUTS / self._model_output_name()
+
+    def _handle_dropped_files(self, paths: list[Path]) -> None:
+        if self.active_task is not None or self.model_loading or not self.detector.ready:
+            self._show_error("Chi co the keo tha file khi app dang ranh va model da nap xong.")
+            return
+        supported = [path for path in paths if path.is_file()]
+        if not supported:
+            return
+        if len(supported) > 1:
+            self._append_log("Keo tha nhieu file; app se xu ly file dau tien.")
+        self._process_dropped_or_selected_file(supported[0])
+
+    def _process_dropped_or_selected_file(self, path: Path) -> None:
+        suffix = path.suffix.lower()
+        if suffix in IMAGE_EXTENSIONS:
+            self._process_image_path(path)
+        elif suffix in VIDEO_EXTENSIONS:
+            self._process_video_path(path)
+        elif suffix == ".pt":
+            self._load_model_async(path)
+        else:
+            self._show_error(f"Khong ho tro file: {path.name}")
+
+    def _process_image_path(self, path: Path) -> None:
+        imgsz, conf, device = self._settings()
+        self.active_task = "image"
+        self._set_status("Dang xu ly anh keo tha...")
+        self._set_controls()
+
+        def run_image() -> None:
+            try:
+                media, result = process_image(
+                    self.detector,
+                    path,
+                    self._image_output_directory(),
+                    imgsz,
+                    conf,
+                    device,
+                )
+                self.events.put(("image_done", (media, result)))
+            except Exception as exc:
+                self.events.put(("task_error", str(exc)))
+
+        Thread(target=run_image, daemon=True).start()
+
+    def _process_video_path(self, path: Path) -> None:
+        first_frame = self._read_first_video_frame(path)
+        if first_frame is None:
+            self._show_error("Khong the doc frame dau tien cua video.")
+            return
+        roi_dialog = BedRoiDialog(first_frame, self.window)
+        if roi_dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        selected_bed_roi = roi_dialog.selected_roi
+        imgsz, conf, device = self._settings()
+        self.active_task = "video"
+        self.cancel_video.clear()
+        if selected_bed_roi is not None:
+            self._append_log("Video: da chon ROI giuong rieng cho video nay.")
+        else:
+            self._append_log("Video: khong chon ROI rieng; dung fallback bed_roi.json neu duoc bat.")
+        self._set_status("Dang xu ly video keo tha...")
+        self._set_controls()
+
+        def preview(result: DetectionResult, current: int, total: int) -> None:
+            self.events.put(("video_preview", (result, current, total)))
+
+        def run_video() -> None:
+            try:
+                media = process_video(
+                    self.detector,
+                    path,
+                    self._video_output_directory(),
+                    imgsz,
+                    conf,
+                    device,
+                    self.cancel_video,
+                    preview,
+                    selected_bed_roi,
+                )
+                self.events.put(("video_done", media))
+            except InterruptedError as exc:
+                self.events.put(("task_cancelled", str(exc)))
+            except Exception as exc:
+                self.events.put(("task_error", str(exc)))
+
+        Thread(target=run_video, daemon=True).start()
+
     def _update_conf_label(self, value: int) -> None:
         self.conf_label.setText(f"{value / 100.0:.2f}")
 
@@ -301,7 +534,7 @@ class FallDetectionApp:
         def run_image() -> None:
             try:
                 media, result = process_image(
-                    self.detector, Path(path), IMAGE_OUTPUTS, imgsz, conf, device
+                    self.detector, Path(path), self._image_output_directory(), imgsz, conf, device
                 )
                 self.events.put(("image_done", (media, result)))
             except Exception as exc:
@@ -315,9 +548,21 @@ class FallDetectionApp:
         )
         if not path:
             return
+        first_frame = self._read_first_video_frame(Path(path))
+        if first_frame is None:
+            self._show_error("Khong the doc frame dau tien cua video.")
+            return
+        roi_dialog = BedRoiDialog(first_frame, self.window)
+        if roi_dialog.exec() != QDialog.DialogCode.Accepted:
+            return
+        selected_bed_roi = roi_dialog.selected_roi
         imgsz, conf, device = self._settings()
         self.active_task = "video"
         self.cancel_video.clear()
+        if selected_bed_roi is not None:
+            self._append_log("Video: da chon ROI giuong rieng cho video nay.")
+        else:
+            self._append_log("Video: khong chon ROI rieng; dung fallback bed_roi.json neu duoc bat.")
         self._set_status("Đang xử lý video...")
         self._set_controls()
 
@@ -329,12 +574,13 @@ class FallDetectionApp:
                 media = process_video(
                     self.detector,
                     Path(path),
-                    VIDEO_OUTPUTS,
+                    self._video_output_directory(),
                     imgsz,
                     conf,
                     device,
                     self.cancel_video,
                     preview,
+                    selected_bed_roi,
                 )
                 self.events.put(("video_done", media))
             except InterruptedError as exc:
@@ -343,6 +589,16 @@ class FallDetectionApp:
                 self.events.put(("task_error", str(exc)))
 
         Thread(target=run_video, daemon=True).start()
+
+    def _read_first_video_frame(self, path: Path) -> Any | None:
+        capture = cv2.VideoCapture(str(path))
+        try:
+            if not capture.isOpened():
+                return None
+            ok, frame = capture.read()
+            return frame if ok else None
+        finally:
+            capture.release()
 
     def _cancel_video(self) -> None:
         self.cancel_video.set()
