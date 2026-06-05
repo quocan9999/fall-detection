@@ -8,3 +8,5 @@ outputs/images/*
 outputs/videos/*
 !outputs/images/.gitkeep
 !outputs/videos/.gitkeep
+sleeping-as-fall-lan3/
+sleeping-as-fall-lan3-test/
