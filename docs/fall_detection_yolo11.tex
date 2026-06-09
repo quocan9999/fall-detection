@@ -1,0 +1,1131 @@
+% ============================================================
+%  BÁO CÁO ĐỒ ÁN MÔN HỌC: DEEP LEARNING
+%  Đề tài: Phát hiện té ngã bằng Fine-tune YOLO11
+% ============================================================
+\documentclass[12pt, a4paper]{article}
+
+% ── Encoding & Language ─────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese,english]{babel}
+
+% ── Page Layout ─────────────────────────────────────────────
+\usepackage[
+  top=2.5cm, bottom=2.5cm,
+  left=3cm,  right=2.5cm
+]{geometry}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\onehalfspacing
+
+% ── Math ────────────────────────────────────────────────────
+\usepackage{amsmath, amssymb, amsthm}
+
+% ── Graphics & Figures ──────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+\graphicspath{{figures/}}          % đặt ảnh vào thư mục figures/
+
+% ── Tables ──────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+
+% ── Code Listing ────────────────────────────────────────────
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+\lstdefinestyle{mystyle}{
+  backgroundcolor=\color{backcolour},
+  commentstyle=\color{codegreen},
+  keywordstyle=\color{blue}\bfseries,
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\ttfamily\footnotesize,
+  breakatwhitespace=false,
+  breaklines=true,
+  captionpos=b,
+  keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  showspaces=false,
+  showstringspaces=false,
+  showtabs=false,
+  tabsize=2,
+  frame=single,
+  rulecolor=\color{black!20}
+}
+\lstset{style=mystyle}
+
+% ── Hyperlinks ──────────────────────────────────────────────
+\usepackage[
+  colorlinks=true,
+  linkcolor=blue!70!black,
+  citecolor=green!50!black,
+  urlcolor=blue
+]{hyperref}
+
+% ── Caption ─────────────────────────────────────────────────
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf}
+
+% ── Header / Footer ─────────────────────────────────────────
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Đồ án môn Deep Learning}
+\fancyhead[R]{\small Phát hiện té ngã - Fine-tune YOLO11}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Miscellaneous ───────────────────────────────────────────
+\usepackage{enumitem}
+\usepackage{multicol}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit}
+
+% ============================================================
+\begin{document}
+
+% ──────────────────────────────────────────────────────────
+%  TRANG BÌA
+% ──────────────────────────────────────────────────────────
+\begin{titlepage}
+  \centering
+  \vspace*{1cm}
+
+  {\Large \textbf{TRƯỜNG ĐẠI HỌC CÔNG THƯƠNG THÀNH PHỐ HỒ CHÍ MINH}}\\[0.3cm]
+  {\large \textbf{KHOA CÔNG NGHỆ THÔNG TIN}}\\[0.5cm]
+  \rule{\textwidth}{1.5pt}\\[0.5cm]
+
+  \vspace{1.5cm}
+  {\LARGE \textbf{BÁO CÁO ĐỒ ÁN MÔN HỌC}}\\[0.3cm]
+  {\Large \textbf{DEEP LEARNING}}\\[2cm]
+
+  {\huge \bfseries
+PHÁT HIỆN TÉ NGÃ BẰNG\\[0.25cm]
+PHƯƠNG PHÁP FINE-TUNE\\[0.25cm]
+YOLO11\\[0.25cm]
+}
+
+  \vspace{2cm}
+  \begin{flushright}
+  \textbf{Giảng viên hướng dẫn: Huỳnh Thái Học}\\[0.8cm]
+  \textbf{Nhóm : 6}\\[0.6cm]
+  Trình Quốc An - 2001230006\\[0.4cm]
+  Nguyễn Huy Hoàng - 2001230264\\[0.4cm]
+  \end{flushright}
+
+  \vfill
+  {\large Thành phố Hồ Chí Minh, tháng 06 năm 2026}
+\end{titlepage}
+
+% ──────────────────────────────────────────────────────────
+%  MỤC LỤC
+% ──────────────────────────────────────────────────────────
+\tableofcontents
+\newpage
+
+\listoffigures
+\listoftables
+\newpage
+
+% ============================================================
+%  CHƯƠNG 1 — GIỚI THIỆU
+% ============================================================
+\section{Giới thiệu}
+
+\subsection{Đặt vấn đề}
+Té ngã là một trong những tai nạn thường gặp ở người cao tuổi, bệnh nhân sau phẫu thuật và người có hạn chế về vận động.
+Khi không được phát hiện kịp thời, té ngã có thể gây ra các hậu quả nghiêm trọng như gãy xương, chấn thương đầu hoặc mất khả năng vận động.
+Trong một số trường hợp, người bị té ngã không thể tự gọi trợ giúp, nhất là khi ở một mình hoặc ở khu vực ít người quan sát.
+
+Hiện nay, việc giám sát té ngã vẫn thường dựa vào người chăm sóc, camera an ninh hoặc các thiết bị đeo trên cơ thể.
+Các phương pháp này có những hạn chế nhất định.
+Quan sát thủ công khó duy trì liên tục trong thời gian dài, còn thiết bị đeo phụ thuộc vào việc người dùng có mang thiết bị đúng cách hay không.
+Nếu thiết bị hết pin, bị tháo ra hoặc không được sử dụng thường xuyên, hệ thống có thể bỏ sót sự cố.
+
+Vì vậy, phát hiện té ngã bằng thị giác máy tính là một hướng tiếp cận đáng quan tâm.
+Thông qua hình ảnh từ camera, hệ thống có thể phân tích tư thế người và nhận biết các trạng thái bất thường của cơ thể.
+Với sự phát triển của các mô hình Deep Learning, đặc biệt là các mô hình phát hiện đối tượng và ước lượng tư thế người, bài toán phát hiện té ngã có thêm nhiều khả năng cải thiện về độ chính xác và tính tự động.
+
+\subsection{Mục tiêu đề tài}
+Đề tài hướng đến việc xây dựng và đánh giá một quy trình fine-tune mô hình YOLO11-Pose cho bài toán phát hiện té ngã dựa trên tư thế người.
+Các mục tiêu cụ thể gồm:
+\begin{itemize}[nosep]
+  \item Tìm hiểu cơ sở lý thuyết về Object Detection, YOLO11-Pose và Human Pose Estimation.
+  \item Chuẩn bị dữ liệu theo định dạng YOLO Keypoint phù hợp với mô hình YOLO11-Pose.
+  \item Fine-tune mô hình pretrained \texttt{yolo11s-pose.pt} trên dữ liệu té ngã.
+  \item Đánh giá kết quả huấn luyện thông qua các chỉ số định lượng và phân tích một số trường hợp dự đoán thực tế.
+\end{itemize}
+
+\subsection{Phạm vi đề tài}
+Trong phạm vi đồ án môn học, đề tài được giới hạn như sau:
+\begin{itemize}[nosep]
+  \item \textbf{Mô hình:} Sử dụng pretrained \texttt{yolo11s-pose.pt} (Ultralytics).
+  \item \textbf{Dữ liệu:} Sử dụng tập dữ liệu ảnh có annotation dạng bounding box và keypoint của người.
+  \item \textbf{Phương pháp:} Fine-tune từ mô hình đã pretrained, không huấn luyện mô hình từ đầu.
+  \item \textbf{Đánh giá:} Tập trung vào kết quả trên tập validation/test và một số mẫu inference minh họa.
+  \item \textbf{Giới hạn:} Chưa triển khai thành ứng dụng hoàn chỉnh và chưa xử lý video theo thời gian thực.
+\end{itemize}
+
+\subsection{Cấu trúc bài báo cáo}
+Báo cáo gồm sáu chương.
+Chương~1 giới thiệu bối cảnh, mục tiêu, phạm vi và cấu trúc của đề tài.
+Chương~\ref{sec:theory} trình bày cơ sở lý thuyết về Object Detection, YOLO11-Pose, Human Pose Estimation, fine-tuning và các độ đo đánh giá.
+Chương~\ref{sec:dataset} mô tả dataset, định dạng annotation, thống kê dữ liệu và các bước tiền xử lý.
+Chương~\ref{sec:pipeline} trình bày pipeline fine-tune, cấu hình thực nghiệm và quá trình huấn luyện.
+Chương~\ref{sec:experiments} trình bày kết quả thực nghiệm, đánh giá mô hình và phân tích lỗi.
+Chương~\ref{sec:conclusion} tổng kết kết quả đạt được, nêu hạn chế và đề xuất hướng phát triển.
+
+% ============================================================
+%  CHƯƠNG 2 — CƠ SỞ LÝ THUYẾT
+% ============================================================
+\section{Cơ sở lý thuyết}
+\label{sec:theory}
+
+\subsection{Object Detection và One-stage Detector}
+
+\subsubsection{Tổng quan Object Detection}
+Object Detection là bài toán xác định trong ảnh có những đối tượng nào và vị trí của từng đối tượng nằm ở đâu.
+Khác với bài toán phân loại ảnh, trong đó mô hình chỉ dự đoán nhãn chung cho toàn bộ ảnh, Object Detection cần trả về đồng thời nhãn lớp (class label) và vùng chứa đối tượng.
+Vùng chứa này thường được biểu diễn bằng bounding box gồm tọa độ tâm, chiều rộng và chiều cao của hộp bao quanh đối tượng.
+
+Đầu ra của một mô hình Object Detection thường gồm ba thành phần chính: bounding box, nhãn lớp và độ tin cậy (confidence score).
+Bounding box cho biết vị trí đối tượng trong ảnh, nhãn lớp cho biết đối tượng thuộc loại nào, còn confidence score thể hiện mức độ chắc chắn của mô hình đối với dự đoán đó.
+Trong các hệ thống thị giác máy tính, Object Detection là bước nền tảng cho nhiều bài toán phức tạp hơn như theo dõi đối tượng, nhận dạng hành động, phân tích hành vi và ước lượng tư thế người.
+
+Đối với bài toán phát hiện té ngã, Object Detection giúp xác định vị trí người trong khung hình trước khi phân tích sâu hơn về tư thế.
+Khi kết hợp với Pose Estimation, mô hình không chỉ biết người xuất hiện ở đâu mà còn có thể dự đoán các điểm keypoint trên cơ thể, từ đó hỗ trợ nhận biết các tư thế bất thường như nằm, ngã hoặc mất thăng bằng.
+
+\subsubsection{Two-stage Detector và One-stage Detector}
+Các phương pháp Object Detection hiện đại thường được chia thành hai nhóm: Two-stage Detector và One-stage Detector.
+\begin{itemize}
+  \item \textbf{Two-stage Detector} như Faster R-CNN~\cite{ren2015faster}: mô hình tạo ra các vùng đề xuất có khả năng chứa đối tượng, sau đó phân loại và tinh chỉnh bounding box cho từng vùng. Cách tiếp cận này thường cho độ chính xác tốt nhưng tốc độ suy luận chậm hơn do phải xử lý qua hai giai đoạn.
+  \item \textbf{One-stage Detector} như YOLO~\cite{redmon2016yolo} và SSD: mô hình dự đoán trực tiếp bounding box, nhãn lớp và confidence score trong một lần forward pass. Cách tiếp cận này có tốc độ nhanh hơn, phù hợp với các bài toán cần xử lý gần thời gian thực.
+\end{itemize}
+
+Trong đề tài này, YOLO11-Pose thuộc nhóm One-stage Detector.
+Ưu điểm về tốc độ của YOLO phù hợp với bài toán phát hiện té ngã, vì hệ thống giám sát cần phản hồi nhanh khi có sự cố xảy ra.
+
+\subsubsection{Anchor-based và Anchor-free Detector}
+Trong các mô hình Object Detection, một điểm khác biệt quan trọng là cách mô hình dự đoán bounding box.
+Các mô hình anchor-based sử dụng một tập các anchor box được định nghĩa trước với nhiều kích thước và tỷ lệ khác nhau.
+Mô hình học cách điều chỉnh các anchor box này sao cho khớp với đối tượng thật trong ảnh.
+Cách làm này hiệu quả trong nhiều trường hợp nhưng phụ thuộc vào việc thiết kế anchor box phù hợp với dữ liệu.
+
+Ngược lại, các mô hình anchor-free không cần sử dụng anchor box cố định.
+Mô hình dự đoán trực tiếp vị trí và kích thước của bounding box dựa trên đặc trưng ảnh.
+YOLO11 sử dụng hướng tiếp cận anchor-free, giúp đơn giản hóa quá trình huấn luyện và giảm sự phụ thuộc vào các tham số thiết kế thủ công.
+Điều này có lợi khi áp dụng mô hình cho các bộ dữ liệu có tư thế người đa dạng, chẳng hạn dữ liệu té ngã với nhiều góc nhìn và dáng người khác nhau.
+
+% ─────────────────────────────────────────
+\subsection{Tổng quan họ mô hình YOLO}
+
+YOLO (You Only Look Once) là họ mô hình phát hiện đối tượng một giai đoạn, được thiết kế để dự đoán bounding box và nhãn lớp trực tiếp trong một lần lan truyền qua mạng.
+Từ phiên bản đầu tiên năm 2016, YOLO đã trải qua nhiều cải tiến về backbone, cơ chế dự đoán, tốc độ suy luận và khả năng triển khai trên thiết bị thực tế.
+
+\begin{table}[H]
+  \centering
+  \caption{Tóm tắt một số phiên bản tiêu biểu của họ mô hình YOLO}
+  \label{tab:yolo_history}
+  \begin{tabularx}{\textwidth}{@{}lXX@{}}
+    \toprule
+    \textbf{Phiên bản} & \textbf{Đặc điểm nổi bật} & \textbf{Ý nghĩa cải tiến} \\
+    \midrule
+    YOLOv1 (2016) & Đề xuất cách tiếp cận one-stage detector & Dự đoán trực tiếp bounding box và class trong một lần xử lý ảnh \\
+    YOLOv3 (2018) & Multi-scale detection, Darknet-53 & Cải thiện khả năng phát hiện đối tượng ở nhiều kích thước \\
+    YOLOv5 (2020) & Triển khai bằng PyTorch, dễ huấn luyện và triển khai & Góp phần phổ biến YOLO trong các ứng dụng thực tế \\
+    YOLOv8 (2023) & Anchor-free, decoupled head & Đơn giản hóa thiết kế và cải thiện hiệu quả huấn luyện \\
+    YOLO11 (2024) & C3k2, C2PSA, hỗ trợ nhiều tác vụ thị giác máy tính & Cải thiện cân bằng giữa tốc độ và độ chính xác \\
+    YOLO12 (2025) & Kiến trúc chú trọng attention & Khai thác attention trong bài toán phát hiện đối tượng thời gian thực \\
+    YOLO26 (2026) & Tối ưu cho edge AI và suy luận nhanh hơn & Hướng đến triển khai thực tế trên thiết bị tài nguyên hạn chế \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Trong phạm vi đề tài này, mô hình được sử dụng là \texttt{yolo11s-pose.pt}.
+Mặc dù đã có các phiên bản mới hơn, YOLO11-Pose vẫn phù hợp với bài toán phát hiện té ngã vì có sẵn biến thể Pose Estimation, hỗ trợ huấn luyện keypoint tùy chỉnh và được tích hợp trực tiếp trong hệ sinh thái Ultralytics.
+
+% ─────────────────────────────────────────
+\subsection{Kiến trúc YOLO11-Pose}
+\label{subsec:yolo11_arch}
+
+YOLO11-Pose là biến thể của YOLO11 được thiết kế cho bài toán Human Pose Estimation.
+Thay vì chỉ dự đoán bounding box và nhãn lớp như mô hình phát hiện đối tượng thông thường, YOLO11-Pose bổ sung thêm nhánh dự đoán keypoint để xác định vị trí các điểm đặc trưng trên cơ thể người.
+Với mỗi người được phát hiện trong ảnh, mô hình có thể trả về bounding box, confidence score và tập keypoint tương ứng.
+
+Về tổng thể, YOLO11-Pose vẫn tuân theo cấu trúc phổ biến của các mô hình YOLO hiện đại, gồm ba phần chính: backbone, neck và head.
+Backbone chịu trách nhiệm trích xuất đặc trưng từ ảnh đầu vào.
+Neck kết hợp các đặc trưng ở nhiều mức khác nhau để tăng khả năng phát hiện đối tượng có kích thước đa dạng.
+Head tạo ra các dự đoán cuối cùng, bao gồm bounding box, class và keypoint.
+Đối với bài toán phát hiện té ngã, phần keypoint đặc biệt quan trọng vì tư thế cơ thể cung cấp nhiều thông tin hơn so với bounding box đơn thuần.
+
+\subsubsection{Backbone - Trích xuất đặc trưng}
+Backbone là phần đầu của mạng, nhận ảnh đầu vào và trích xuất các đặc trưng thị giác như cạnh, góc, vùng màu, hình dạng và cấu trúc cơ thể người.
+Trong YOLO11, backbone sử dụng các khối \textbf{C3k2}, một dạng cải tiến của các khối Cross-Stage Partial nhằm tăng khả năng biểu diễn đặc trưng nhưng vẫn giữ chi phí tính toán hợp lý.
+Các khối này giúp mô hình học được đặc trưng ở nhiều mức: đặc trưng nông chứa thông tin chi tiết về vị trí, còn đặc trưng sâu chứa thông tin ngữ nghĩa mạnh hơn.
+
+Đối với dữ liệu người bị té ngã, backbone cần học được nhiều biến thể hình dáng cơ thể như đứng, ngồi, nằm, cúi người hoặc bị che khuất một phần.
+Khả năng trích xuất đặc trưng ổn định giúp các tầng phía sau xác định người và keypoint chính xác hơn trong nhiều góc camera khác nhau.
+
+\subsubsection{Neck - Tổng hợp đặc trưng đa tỷ lệ}
+Neck nằm giữa backbone và head, có nhiệm vụ kết hợp đặc trưng từ nhiều tầng khác nhau.
+Trong bài toán phát hiện người, đặc trưng đa tỷ lệ rất quan trọng vì kích thước người trong ảnh có thể thay đổi theo khoảng cách camera, góc nhìn và tư thế.
+YOLO11 sử dụng các thành phần như SPPF, C2PSA và cơ chế tổng hợp đặc trưng kiểu PAN để tăng khả năng trao đổi thông tin giữa các mức đặc trưng.
+
+\begin{itemize}
+  \item \textbf{SPPF} (Spatial Pyramid Pooling Fast): mở rộng receptive field để mô hình quan sát được vùng ngữ cảnh lớn hơn mà không làm tăng quá nhiều chi phí tính toán.
+  \item \textbf{C2PSA} (Cross-Stage Partial with Position-Sensitive Attention): bổ sung cơ chế attention để mô hình tập trung tốt hơn vào các vùng quan trọng trong ảnh.
+  \item \textbf{PAN} (Path Aggregation Network): kết hợp luồng thông tin từ trên xuống và từ dưới lên, giúp cân bằng giữa thông tin ngữ nghĩa và thông tin vị trí.
+\end{itemize}
+
+Nhờ phần neck, mô hình có thể tận dụng đồng thời thông tin chi tiết ở tầng nông và thông tin ngữ nghĩa ở tầng sâu.
+Điều này hữu ích khi phát hiện té ngã, vì người trong tư thế nằm có thể chiếm vùng ảnh khác biệt so với người đứng và dễ bị nhầm với các vật thể nền nếu đặc trưng không đủ rõ.
+
+\subsubsection{Detection Head và Keypoint Head}
+Head là phần tạo ra dự đoán cuối cùng của mô hình.
+YOLO11 sử dụng \textbf{Decoupled Head}, trong đó nhánh phân loại và nhánh hồi quy bounding box được tách riêng.
+Cách thiết kế này giúp từng nhánh tập trung vào nhiệm vụ riêng: một nhánh xác định lớp đối tượng, nhánh còn lại xác định vị trí và kích thước bounding box.
+
+Trong YOLO11-Pose, ngoài các nhánh phục vụ object detection, mô hình còn có \textbf{Keypoint Head} để dự đoán tọa độ và trạng thái visibility của các keypoint.
+Với cấu hình chuẩn COCO, mỗi người có 17 keypoints; với dataset của đề tài, cấu hình được mở rộng thành 18 keypoints có thêm điểm Neck.
+Mỗi keypoint gồm tọa độ $(x, y)$ và giá trị visibility.
+Các dự đoán được thực hiện trên nhiều mức đặc trưng, thường tương ứng với P3, P4 và P5, để xử lý tốt đối tượng ở các kích thước khác nhau.
+
+Đầu ra của YOLO11-Pose vì vậy phù hợp với bài toán phát hiện té ngã hơn so với mô hình object detection thông thường.
+Bounding box cho biết vị trí người trong ảnh, còn keypoint mô tả cấu trúc tư thế.
+Từ các keypoint như vai, hông, đầu gối và cổ chân, hệ thống có thể phân tích dáng người và nhận biết các tư thế bất thường liên quan đến té ngã.
+
+% ─────────────────────────────────────────
+\subsection{Human Pose Estimation và Keypoint Detection}
+
+\subsubsection{Tổng quan Human Pose Estimation (HPE)}
+Human Pose Estimation (HPE) là bài toán xác định vị trí các khớp hoặc điểm đặc trưng trên cơ thể người trong ảnh hoặc video.
+Thay vì chỉ biết trong ảnh có người hay không, HPE mô tả cấu trúc cơ thể thông qua các keypoint như mắt, vai, khuỷu tay, hông, đầu gối và cổ chân.
+Tập hợp các keypoint này tạo thành một biểu diễn đơn giản của tư thế người, giúp mô hình hoặc hệ thống phía sau phân tích dáng đứng, dáng ngồi, chuyển động hoặc các tư thế bất thường.
+
+Các phương pháp HPE thường được chia thành hai hướng tiếp cận chính.
+Hướng \textbf{top-down} phát hiện người trước, sau đó ước lượng keypoint bên trong từng bounding box.
+Hướng \textbf{bottom-up} phát hiện toàn bộ keypoint trong ảnh trước, sau đó ghép các keypoint lại thành từng người.
+YOLO11-Pose gần với hướng top-down tích hợp trong một mô hình duy nhất: mô hình vừa phát hiện người, vừa dự đoán keypoint tương ứng trong cùng quá trình suy luận.
+
+Trong bài toán phát hiện té ngã, HPE cung cấp thông tin quan trọng hơn so với bounding box đơn thuần.
+Ví dụ, một người đang nằm sau khi té và một vật thể dài trên sàn có thể có bounding box tương đối giống nhau, nhưng cấu trúc keypoint của người giúp phân biệt rõ hơn tư thế cơ thể.
+Các quan hệ giữa vai, hông, đầu gối và cổ chân cũng có thể phản ánh trạng thái mất thăng bằng, nằm ngang hoặc tư thế bất thường.
+
+\subsubsection{Chuẩn COCO 17 Keypoints và biến thể 18 Keypoints}
+Bộ keypoint chuẩn COCO là một quy ước phổ biến trong các mô hình ước lượng tư thế người.
+Mỗi người được mô tả bằng 17 điểm, bao phủ các vùng chính của cơ thể như đầu, tay, thân người và chân.
+Danh sách 17 keypoints bao gồm:
+\begin{multicols}{3}
+\begin{itemize}[nosep]
+  \item[0.] Nose
+  \item[1.] Left Eye
+  \item[2.] Right Eye
+  \item[3.] Left Ear
+  \item[4.] Right Ear
+  \item[5.] Left Shoulder
+  \item[6.] Right Shoulder
+  \item[7.] Left Elbow
+  \item[8.] Right Elbow
+  \item[9.] Left Wrist
+  \item[10.] Right Wrist
+  \item[11.] Left Hip
+  \item[12.] Right Hip
+  \item[13.] Left Knee
+  \item[14.] Right Knee
+  \item[15.] Left Ankle
+  \item[16.] Right Ankle
+\end{itemize}
+\end{multicols}
+
+Các keypoint ở vùng đầu như nose, eye và ear giúp xác định hướng cơ thể trong một số trường hợp.
+Các keypoint ở vai và hông mô tả trục thân người, thường hữu ích khi phân biệt tư thế đứng, nghiêng hoặc nằm.
+Các keypoint ở đầu gối và cổ chân cung cấp thêm thông tin về vị trí chân, đặc biệt trong các tư thế ngồi, quỳ hoặc té ngã.
+
+Trong dataset sử dụng cho đề tài này, annotation dùng biến thể \textbf{18 keypoints}, bổ sung thêm điểm \textit{Neck} để biểu diễn vùng cổ/thân trên rõ hơn.
+Điểm Neck giúp nối thông tin giữa đầu, vai và thân người, hữu ích khi phân tích độ nghiêng của cơ thể trong các tư thế nằm hoặc té ngã.
+Thứ tự 18 keypoints trong dataset được quy ước như sau:
+
+\begin{multicols}{2}
+\begin{itemize}[nosep]
+  \item[0.] Nose
+  \item[1.] Neck
+  \item[2.] Right Shoulder
+  \item[3.] Right Elbow
+  \item[4.] Right Wrist
+  \item[5.] Left Shoulder
+  \item[6.] Left Elbow
+  \item[7.] Left Wrist
+  \item[8.] Right Hip
+  \item[9.] Right Knee
+  \item[10.] Right Ankle
+  \item[11.] Left Hip
+  \item[12.] Left Knee
+  \item[13.] Left Ankle
+  \item[14.] Right Eye
+  \item[15.] Left Eye
+  \item[16.] Right Ear
+  \item[17.] Left Ear
+\end{itemize}
+\end{multicols}
+
+Với định dạng này, file cấu hình dataset sử dụng \texttt{kpt\_shape: [18, 3]}, nghĩa là mỗi người có 18 keypoints và mỗi keypoint gồm tọa độ $(x, y)$ cùng visibility flag.
+
+\subsubsection{Visibility Flag}
+Trong annotation dạng keypoint, mỗi keypoint thường đi kèm với giá trị visibility flag $v$.
+Giá trị này cho biết keypoint có được gán nhãn hay không và có nhìn thấy rõ trong ảnh hay không:
+\begin{itemize}[nosep]
+  \item $v = 0$: keypoint không được đánh nhãn (not labeled).
+  \item $v = 1$: keypoint bị che khuất (labeled but not visible / occluded).
+  \item $v = 2$: keypoint hiển thị rõ (labeled and visible).
+\end{itemize}
+
+Visibility flag giúp quá trình huấn luyện và đánh giá xử lý tốt hơn các trường hợp người bị che khuất một phần.
+Trong dữ liệu té ngã, hiện tượng che khuất có thể xảy ra khi người nằm gần đồ vật, bị khuất bởi giường, ghế hoặc nằm ở góc camera khó quan sát.
+Nếu không phân biệt keypoint bị che khuất và keypoint không được gán nhãn, mô hình có thể học sai hoặc bị phạt không hợp lý trong quá trình tính loss.
+
+% ─────────────────────────────────────────
+\subsection{Bài toán phát hiện té ngã dựa trên tư thế người}
+
+Phát hiện té ngã là bài toán xác định một người có đang ở trạng thái té ngã hay không dựa trên thông tin quan sát được từ ảnh hoặc video.
+Nếu chỉ dựa vào bounding box, mô hình có thể biết vị trí người trong khung hình nhưng chưa mô tả đầy đủ tư thế cơ thể.
+Trong nhiều trường hợp, người nằm trên sàn, người đang cúi thấp hoặc người ngồi nghiêng có thể tạo ra bounding box tương đối giống nhau.
+Do đó, thông tin keypoint đóng vai trò quan trọng để phân biệt trạng thái té ngã với các tư thế sinh hoạt bình thường.
+
+Khi sử dụng pose estimation, tư thế người có thể được phân tích thông qua quan hệ hình học giữa các keypoint.
+Một số đặc trưng thường có ý nghĩa trong bài toán té ngã gồm tỷ lệ chiều rộng và chiều cao của bounding box, độ nghiêng của trục vai - hông, vị trí tương đối giữa đầu, vai, hông và chân, cũng như khoảng cách của cơ thể so với mặt sàn trong khung hình.
+Ví dụ, khi người đứng thẳng, trục cơ thể thường gần với phương thẳng đứng.
+Khi người té hoặc nằm, trục này có xu hướng nghiêng mạnh hoặc gần song song với phương ngang.
+
+Bài toán này cũng có một số khó khăn thực tế.
+Tư thế té ngã có thể thay đổi theo góc camera, khoảng cách đến camera, ánh sáng, vật che khuất và tình huống xảy ra trong môi trường.
+Một số tư thế bình thường như nằm nghỉ, ngồi thấp hoặc cúi người nhặt đồ cũng dễ bị nhầm với té ngã nếu hệ thống chỉ dựa vào một vài đặc trưng đơn giản.
+Vì vậy, mô hình cần được huấn luyện trên dữ liệu phù hợp với nhiều tư thế và bối cảnh khác nhau.
+
+Trong phạm vi đề tài, YOLO11-Pose được fine-tune để thích nghi với dữ liệu té ngã.
+Mô hình dự đoán bounding box và keypoint của người, sau đó kết quả này được dùng để đánh giá khả năng nhận biết các tư thế liên quan đến té ngã.
+Cách tiếp cận dựa trên pose giúp báo cáo phân tích rõ hơn các trường hợp mô hình dự đoán đúng, bỏ sót hoặc nhầm lẫn trong phần thực nghiệm.
+
+% ─────────────────────────────────────────
+\subsection{Các hàm Loss trong YOLO11-Pose}
+
+Trong quá trình huấn luyện, YOLO11-Pose cần tối ưu đồng thời hai nhóm nhiệm vụ: phát hiện người và ước lượng keypoint.
+Vì vậy, hàm loss không chỉ đánh giá bounding box và class như object detection thông thường, mà còn đánh giá độ chính xác của các keypoint trên cơ thể người.
+Ở mức khái quát, loss tổng hợp có thể biểu diễn như sau:
+
+\begin{equation}
+  \mathcal{L}_{total} = \lambda_{box}\,\mathcal{L}_{box}
+                      + \lambda_{cls}\,\mathcal{L}_{cls}
+                      + \lambda_{dfl}\,\mathcal{L}_{dfl}
+                      + \lambda_{kpt}\,\mathcal{L}_{kpt}
+                      + \lambda_{kobj}\,\mathcal{L}_{kobj}
+  \label{eq:total_loss}
+\end{equation}
+
+Trong đó, các hệ số $\lambda$ dùng để cân bằng mức đóng góp của từng thành phần loss.
+Việc kết hợp nhiều thành phần loss giúp mô hình vừa học cách định vị người trong ảnh, vừa học cấu trúc tư thế thông qua các keypoint.
+
+\subsubsection{Bounding Box Loss}
+Bounding Box Loss đo mức độ sai khác giữa bounding box dự đoán và bounding box ground truth.
+Thành phần này giúp mô hình học được vị trí và kích thước vùng chứa người trong ảnh.
+Trong các mô hình YOLO hiện đại, loss cho bounding box thường dựa trên độ chồng lấp giữa hai box, chẳng hạn IoU hoặc các biến thể cải tiến của IoU.
+
+\begin{equation}
+  \mathcal{L}_{box} = 1 - IoU(\mathbf{b}, \mathbf{b}^{gt})
+\end{equation}
+
+Trong đó $\mathbf{b}$ là bounding box dự đoán và $\mathbf{b}^{gt}$ là bounding box ground truth.
+Giá trị IoU càng cao thì hai box càng khớp nhau, do đó giá trị loss càng nhỏ.
+Bên cạnh đó, \textbf{Distribution Focal Loss} (DFL)~\cite{li2020generalized} được dùng để hỗ trợ mô hình học phân bố tọa độ bounding box chính xác hơn, đặc biệt ở bước tinh chỉnh vị trí biên của box.
+
+\subsubsection{Classification Loss}
+Classification Loss đánh giá khả năng dự đoán đúng lớp của đối tượng.
+Với bài toán phát hiện té ngã, thành phần này phụ thuộc vào cách tổ chức nhãn của dataset.
+Nếu dataset chỉ gán nhãn một lớp \texttt{person}, classification loss chủ yếu giúp mô hình phân biệt vùng có người và không có người.
+Nếu dataset có các lớp như \texttt{fall} và \texttt{non-fall}, classification loss còn trực tiếp tham gia vào việc phân biệt trạng thái té ngã.
+
+Một dạng loss thường dùng cho bài toán phân loại trong detection là Binary Cross-Entropy (BCE):
+
+\begin{equation}
+  \mathcal{L}_{cls} = -\sum_{c} \left[ y_c \log(\hat{p}_c) + (1 - y_c)\log(1 - \hat{p}_c) \right]
+\end{equation}
+
+Trong đó $y_c$ là nhãn thật của lớp $c$, còn $\hat{p}_c$ là xác suất dự đoán của mô hình.
+
+\subsubsection{Keypoint Loss và OKS}
+Keypoint Loss đo sai lệch giữa vị trí keypoint dự đoán và keypoint ground truth.
+Đây là thành phần quan trọng nhất đối với YOLO11-Pose, vì mô hình cần dự đoán chính xác các điểm trên cơ thể như vai, hông, đầu gối và cổ chân.
+Một độ đo thường dùng trong đánh giá và huấn luyện keypoint là \textbf{Object Keypoint Similarity} (OKS).
+OKS có vai trò tương tự IoU trong bounding box, nhưng áp dụng cho keypoint:
+
+\begin{equation}
+  \text{OKS} = \frac{\sum_i \exp\!\left(-\dfrac{d_i^2}{2s^2\sigma_i^2}\right) \cdot \mathbf{1}[v_i > 0]}{\sum_i \mathbf{1}[v_i > 0]}
+  \label{eq:oks}
+\end{equation}
+
+trong đó $d_i$ là khoảng cách Euclidean giữa keypoint dự đoán và ground truth thứ $i$, $s$ là tỷ lệ đối tượng, $\sigma_i$ là hằng số per-keypoint.
+Keypoint càng gần ground truth thì OKS càng cao.
+Do đó, keypoint loss có thể được hiểu theo hướng giảm sai lệch vị trí keypoint, thường liên quan đến đại lượng $1 - \text{OKS}$.
+
+Ngoài vị trí keypoint, YOLO11-Pose còn cần học trạng thái visibility của keypoint.
+Thành phần $\mathcal{L}_{kobj}$ giúp mô hình dự đoán keypoint nào có thể quan sát được và keypoint nào bị che khuất hoặc không được gán nhãn.
+Điều này đặc biệt hữu ích trong dữ liệu té ngã, vì người bị té có thể bị che bởi đồ vật, nằm sát nền hoặc xuất hiện ở góc camera khó quan sát.
+
+% ─────────────────────────────────────────
+\subsection{Transfer Learning và Fine-tuning}
+
+\subsubsection{Transfer Learning}
+Transfer Learning là kỹ thuật tái sử dụng trọng số đã học từ một mô hình được huấn luyện trên tập dữ liệu lớn để giải quyết một bài toán mới.
+Trong thị giác máy tính, các tầng đầu của mạng thường học được những đặc trưng khá tổng quát như cạnh, góc, texture, hình dạng và cấu trúc đối tượng.
+Những đặc trưng này có thể tiếp tục hữu ích khi chuyển sang một tập dữ liệu khác, nhất là khi bài toán mới không có nhiều dữ liệu gán nhãn.
+
+Đối với phát hiện té ngã, việc thu thập và gán nhãn dữ liệu pose thường tốn thời gian hơn so với bài toán phân loại ảnh thông thường.
+Nếu huấn luyện mô hình từ đầu, mô hình cần rất nhiều ảnh và annotation để học lại các đặc trưng cơ bản của cơ thể người.
+Transfer Learning giúp giảm yêu cầu dữ liệu, rút ngắn thời gian huấn luyện và tận dụng kiến thức đã học từ các tập dữ liệu lớn như COCO.
+
+\subsubsection{Feature Extraction vs Fine-tuning}
+Khi sử dụng mô hình pretrained, có hai cách khai thác phổ biến là feature extraction và fine-tuning.
+
+\begin{itemize}
+  \item \textbf{Feature Extraction}: Giữ cố định phần lớn hoặc toàn bộ backbone, chỉ huấn luyện lại các tầng phía sau như neck và head. Cách này phù hợp khi dataset nhỏ, nhưng khả năng thích nghi với tư thế hoặc bối cảnh mới có thể bị hạn chế.
+  \item \textbf{Fine-tuning}: Cho phép một phần hoặc toàn bộ mô hình tiếp tục cập nhật trọng số trên dataset mới. Cách này phù hợp hơn khi cần mô hình thích nghi với dữ liệu té ngã, vì tư thế người trong các tình huống té ngã khác với tư thế người thông thường trong dataset gốc.
+\end{itemize}
+
+Trong đề tài này, hướng tiếp cận chính là fine-tuning từ mô hình pretrained.
+Mục tiêu là giữ lại các đặc trưng tổng quát về cơ thể người, đồng thời điều chỉnh mô hình để nhận biết tốt hơn các tư thế bất thường liên quan đến té ngã.
+
+\subsubsection{Pretrained \texttt{yolo11s-pose.pt}}
+Model \texttt{yolo11s-pose.pt} được pretrain trên dataset \textbf{COCO 2017} với 80 classes và 17 keypoints.
+COCO là tập dữ liệu lớn, chứa nhiều người ở các tư thế, kích thước và bối cảnh khác nhau.
+Nhờ quá trình pretrain này, mô hình đã học được cách phát hiện người và ước lượng các keypoint cơ bản trên cơ thể.
+
+Phiên bản \texttt{yolo11s-pose.pt} là biến thể small, có số lượng tham số và chi phí tính toán thấp hơn các biến thể medium, large hoặc extra-large.
+Điều này phù hợp với phạm vi đồ án vì mô hình vẫn có khả năng ước lượng pose, nhưng nhẹ hơn và dễ huấn luyện hơn trên tài nguyên tính toán hạn chế.
+Sau khi fine-tune, mô hình có thể thích nghi tốt hơn với dữ liệu té ngã mà không cần huấn luyện lại toàn bộ kiến thức từ đầu.
+
+\subsubsection{Tránh Catastrophic Forgetting}
+Catastrophic Forgetting là hiện tượng mô hình mất đi một phần kiến thức đã học từ dữ liệu pretrain khi được huấn luyện tiếp trên một dataset mới.
+Hiện tượng này dễ xảy ra nếu learning rate quá lớn, dataset mới nhỏ hoặc dữ liệu mới có phân bố quá hẹp.
+Trong bài toán té ngã, nếu mô hình chỉ nhìn thấy một số ít tư thế hoặc góc camera, nó có thể học quá lệch vào các mẫu đó và giảm khả năng tổng quát.
+
+Để hạn chế vấn đề này, quá trình fine-tuning thường dùng learning rate nhỏ hơn so với huấn luyện từ đầu, kết hợp với early stopping và theo dõi metric trên tập validation.
+Trong một số trường hợp, có thể freeze một phần backbone ở giai đoạn đầu rồi unfreeze dần để mô hình thích nghi ổn định hơn.
+
+% ─────────────────────────────────────────
+\subsection{Kỹ thuật tối ưu hóa}
+
+\subsubsection{Optimizer}
+Optimizer quyết định cách cập nhật trọng số của mô hình dựa trên gradient của hàm loss.
+Trong huấn luyện deep learning, lựa chọn optimizer ảnh hưởng trực tiếp đến tốc độ hội tụ, độ ổn định và chất lượng nghiệm cuối cùng.
+
+\begin{itemize}
+  \item \textbf{SGD with Momentum}: Cập nhật trọng số theo hướng gradient và sử dụng momentum để làm mượt quá trình tối ưu. Cách này thường ổn định và có khả năng tổng quát tốt khi huấn luyện đủ số epoch.
+  \item \textbf{Adam / AdamW}: Tự điều chỉnh learning rate cho từng tham số dựa trên moment bậc một và bậc hai của gradient. Các optimizer này thường hội tụ nhanh, phù hợp khi fine-tuning với số epoch không quá lớn.
+\end{itemize}
+
+Trong Ultralytics YOLO, optimizer có thể được chọn thủ công hoặc để framework tự động lựa chọn tùy theo cấu hình huấn luyện.
+Với fine-tuning YOLO11s-Pose, cần ưu tiên sự ổn định vì dataset té ngã thường nhỏ hơn nhiều so với dataset pretrain.
+
+\subsubsection{Learning Rate Scheduling}
+Learning rate là một trong những siêu tham số quan trọng nhất khi fine-tune mô hình.
+Nếu learning rate quá lớn, mô hình có thể làm hỏng các trọng số pretrained.
+Nếu learning rate quá nhỏ, mô hình học chậm và khó thích nghi với dữ liệu mới.
+
+\begin{itemize}
+  \item \textbf{Linear Warmup}: Tăng dần learning rate trong một số epoch đầu. Giai đoạn này giúp quá trình huấn luyện ổn định hơn, nhất là khi mô hình bắt đầu thích nghi với dataset mới.
+  \item \textbf{Cosine Annealing Decay}: Giảm learning rate theo dạng cosine trong các epoch sau. Cách giảm này giúp mô hình cập nhật mạnh hơn ở giai đoạn đầu và tinh chỉnh nhẹ hơn khi gần hội tụ.
+\end{itemize}
+
+Trong bài toán phát hiện té ngã, learning rate scheduling giúp cân bằng giữa khả năng học đặc trưng mới và việc giữ lại kiến thức từ mô hình pretrained.
+
+\subsubsection{Regularization và Early Stopping}
+Regularization giúp giảm overfitting, đặc biệt khi dataset không lớn hoặc chưa đủ đa dạng.
+Với dữ liệu té ngã, overfitting có thể làm mô hình nhận diện tốt trên các mẫu quen thuộc nhưng dự đoán kém ở góc camera, ánh sáng hoặc bối cảnh khác.
+
+\begin{itemize}
+  \item \textbf{Weight Decay}: Thêm ràng buộc lên độ lớn của trọng số để hạn chế mô hình học các mẫu quá đặc thù trong tập train.
+  \item \textbf{Data Augmentation}: Tạo thêm biến thể dữ liệu thông qua thay đổi màu sắc, tỉ lệ, vị trí hoặc phối cảnh. Với keypoint data, augmentation cần đảm bảo tọa độ keypoint được biến đổi tương ứng.
+  \item \textbf{Early Stopping}: Dừng huấn luyện khi metric trên tập validation không cải thiện sau một số epoch nhất định. Cách này giúp tránh việc mô hình tiếp tục học thuộc tập train.
+\end{itemize}
+
+% ─────────────────────────────────────────
+\subsection{Các độ đo đánh giá mô hình}
+
+\subsubsection{Precision, Recall, F1-score}
+Precision, Recall và F1-score là các chỉ số thường dùng để đánh giá mô hình phân loại hoặc phát hiện đối tượng.
+Các chỉ số này được tính dựa trên số lượng dự đoán đúng và sai:
+
+\begin{itemize}[nosep]
+  \item \textbf{TP} (True Positive): mô hình phát hiện đúng đối tượng hoặc đúng trạng thái cần nhận diện.
+  \item \textbf{FP} (False Positive): mô hình dự đoán có đối tượng hoặc có té ngã nhưng thực tế không phải.
+  \item \textbf{FN} (False Negative): mô hình bỏ sót đối tượng hoặc bỏ sót trường hợp té ngã.
+\end{itemize}
+
+\begin{equation}
+  \text{Precision} = \frac{TP}{TP + FP}, \quad
+  \text{Recall} = \frac{TP}{TP + FN}, \quad
+  \text{F1} = \frac{2 \cdot P \cdot R}{P + R}
+\end{equation}
+
+Trong bài toán phát hiện té ngã, Recall là chỉ số đặc biệt quan trọng vì bỏ sót một trường hợp té ngã có thể gây hậu quả nghiêm trọng hơn so với cảnh báo nhầm.
+Tuy nhiên, Precision cũng cần được theo dõi để tránh hệ thống tạo quá nhiều cảnh báo sai.
+F1-score cân bằng giữa Precision và Recall, phù hợp khi cần đánh giá tổng quát hiệu quả của mô hình.
+
+\subsubsection{mean Average Precision (mAP)}
+mean Average Precision (mAP) là chỉ số phổ biến trong Object Detection.
+Chỉ số này đánh giá chất lượng dự đoán dựa trên cả độ chính xác phân loại và mức độ khớp giữa bounding box dự đoán với bounding box ground truth.
+Một dự đoán thường được xem là đúng khi class khớp và IoU vượt qua một ngưỡng nhất định.
+
+\textbf{mAP@50} là mAP tại ngưỡng IoU = 0.50.
+\textbf{mAP@50-95} là trung bình mAP tại các ngưỡng IoU từ 0.50 đến 0.95, với bước tăng 0.05.
+
+\begin{equation}
+  \text{mAP@50-95} = \frac{1}{10} \sum_{t \in \{0.5, 0.55,\ldots, 0.95\}} \text{mAP}(t)
+\end{equation}
+
+Trong YOLO-Pose, kết quả đánh giá có thể bao gồm mAP cho bounding box và mAP cho pose/keypoint.
+mAP@50 thường dễ đạt cao hơn vì ngưỡng khớp thấp hơn, còn mAP@50-95 phản ánh chặt chẽ hơn chất lượng định vị của mô hình.
+
+\subsubsection{Object Keypoint Similarity (OKS)}
+Object Keypoint Similarity (OKS) là độ đo dùng để đánh giá mức độ khớp giữa keypoint dự đoán và keypoint ground truth.
+OKS có vai trò tương tự IoU, nhưng thay vì đo độ chồng lấp giữa hai bounding box, OKS đo sai lệch vị trí của các keypoint sau khi đã xét đến kích thước đối tượng và độ khó của từng keypoint.
+Công thức OKS đã được trình bày ở Phương trình~\ref{eq:oks}.
+
+Trong bài toán phát hiện té ngã dựa trên pose, OKS giúp đánh giá chất lượng dự đoán tư thế người.
+Nếu keypoint ở vai, hông, đầu gối hoặc cổ chân bị lệch nhiều, hệ thống có thể phân tích sai tư thế và dẫn đến dự đoán nhầm.
+Vì vậy, ngoài mAP cho bounding box, các chỉ số liên quan đến keypoint cũng cần được xem xét khi đánh giá mô hình YOLO11s-Pose.
+
+% ============================================================
+%  CHƯƠNG 3 — DATASET
+% ============================================================
+\section{Dataset}
+\label{sec:dataset}
+
+\subsection{Mô tả Dataset}
+Dataset ban đầu được tải từ Roboflow Universe, version 7.
+Tuy nhiên, dataset sử dụng trong đồ án không giữ nguyên hoàn toàn như bản tải về ban đầu.
+Nhóm đã xử lý lại dữ liệu để phù hợp với bài toán huấn luyện YOLO11s-Pose, bao gồm gộp nhãn, kiểm tra định dạng label, loại bỏ hoặc sửa các mẫu lỗi và kiểm tra trùng lặp dữ liệu giữa các tập train, validation và test.
+
+Dataset cuối cùng được tổ chức dưới dạng YOLO Pose với hai class:
+\begin{itemize}[nosep]
+  \item \texttt{no\_fall}: các tư thế hoặc hành động bình thường, gồm \textit{Sitting}, \textit{Standing} và \textit{Walking}.
+  \item \texttt{fall}: các tư thế té ngã hoặc nằm thấp, gồm \textit{falling} và \textit{Sleeping}.
+\end{itemize}
+
+Việc ánh xạ \textit{Sleeping} vào class \texttt{fall} là một quyết định chủ động trong quá trình xây dựng dataset.
+Nguyên nhân là số lượng mẫu \texttt{fall} ban đầu ít hơn so với các trạng thái bình thường, trong khi các tư thế ngủ/nằm có nhiều đặc trưng hình học gần với trạng thái té ngã.
+Trong ứng dụng thực tế, các trường hợp mô hình nhận nhầm người đang ngủ là té ngã sẽ được xử lý thêm bằng hậu xử lý theo thời gian và ngữ cảnh, thay vì chỉ dựa vào dự đoán đơn frame của mô hình.
+
+Tập dữ liệu có tổng cộng \textbf{6155 ảnh}, được chia thành ba tập train, validation và test.
+Mỗi ảnh có một file label \texttt{.txt} tương ứng trong thư mục \texttt{labels}.
+Dataset dùng biến thể \textbf{18 keypoints} có thêm điểm \textit{Neck}, phù hợp với bài toán phân tích tư thế thân người.
+
+\begin{table}[H]
+  \centering
+  \caption{Thông tin tổng quan dataset}
+  \label{tab:dataset_overview}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    \textbf{Thuộc tính} & \textbf{Giá trị} \\
+    \midrule
+    Định dạng & YOLO Pose / Keypoint \\
+    Số class & 2 \\
+    Tên class & \texttt{no\_fall}, \texttt{fall} \\
+    Số keypoints & 18 \\
+    Cấu hình keypoint & \texttt{kpt\_shape: [18, 3]} \\
+    Tổng số ảnh & 6155 \\
+    Tổng số instance & 9270 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Cấu trúc thư mục và file cấu hình}
+
+Dataset được lưu trong thư mục \texttt{datasets/} với cấu trúc chuẩn của Ultralytics YOLO:
+
+\begin{lstlisting}[language=, caption={Cấu trúc thư mục dataset}]
+datasets/
+  data.yaml
+  train/
+    images/
+    labels/
+  valid/
+    images/
+    labels/
+  test/
+    images/
+    labels/
+\end{lstlisting}
+
+File \texttt{data.yaml} mô tả đường dẫn train/validation/test, số class, tên class, số lượng keypoint và thứ tự lật trái/phải của keypoint:
+
+\begin{lstlisting}[language=Python, caption={Nội dung chính của file data.yaml}]
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 2
+names: ['no_fall', 'fall']
+
+kpt_shape: [18, 3]
+flip_idx: [0, 1, 5, 6, 7, 2, 3, 4, 11, 12, 13, 8, 9, 10, 15, 14, 17, 16]
+\end{lstlisting}
+
+Trong đó, \texttt{flip\_idx} quy định cách hoán đổi các keypoint bên trái và bên phải khi áp dụng phép lật ngang ảnh.
+Ví dụ, \textit{Right Shoulder} được hoán đổi với \textit{Left Shoulder}, \textit{Right Hip} được hoán đổi với \textit{Left Hip}.
+Điều này cần thiết vì nếu ảnh bị lật ngang mà keypoint không được remap đúng, mô hình sẽ học sai quan hệ trái/phải trên cơ thể.
+
+\subsection{Định dạng Annotation - YOLO Keypoint}
+
+Mỗi ảnh tương ứng với một file \texttt{.txt} có cùng tên, mỗi dòng là một instance:
+
+\begin{equation}
+  \underbrace{c}_{\text{class}} \;\;
+  \underbrace{c_x \;\; c_y \;\; w \;\; h}_{\text{bounding box (normalized)}} \;\;
+  \underbrace{x_1 \;\; y_1 \;\; v_1 \;\; \cdots \;\; x_{18} \;\; y_{18} \;\; v_{18}}_{\text{18 keypoints}}
+\end{equation}
+
+Trong đó, $c$ là class id, $(c_x, c_y, w, h)$ là bounding box đã được chuẩn hóa theo kích thước ảnh.
+Mỗi keypoint gồm tọa độ $(x_i, y_i)$ và visibility flag $v_i$.
+Với \texttt{kpt\_shape: [18, 3]}, mỗi dòng annotation có tổng cộng $5 + 18 \times 3 = 59$ giá trị.
+
+\begin{lstlisting}[language=, caption={Ví dụ một dòng annotation YOLO Keypoint}]
+0 0.421 0.424 0.176 0.533 0.401 0.244 2 0.417 0.237 2 ...
+\end{lstlisting}
+
+Thứ tự 18 keypoints trong dataset lần lượt là:
+\begin{multicols}{2}
+\begin{itemize}[nosep]
+  \item[0.] Nose
+  \item[1.] Neck
+  \item[2.] Right Shoulder
+  \item[3.] Right Elbow
+  \item[4.] Right Wrist
+  \item[5.] Left Shoulder
+  \item[6.] Left Elbow
+  \item[7.] Left Wrist
+  \item[8.] Right Hip
+  \item[9.] Right Knee
+  \item[10.] Right Ankle
+  \item[11.] Left Hip
+  \item[12.] Left Knee
+  \item[13.] Left Ankle
+  \item[14.] Right Eye
+  \item[15.] Left Eye
+  \item[16.] Right Ear
+  \item[17.] Left Ear
+\end{itemize}
+\end{multicols}
+
+\subsection{Phân tích và Thống kê Dataset}
+Số lượng ảnh và label của từng split được trình bày trong Bảng~\ref{tab:dataset_split}.
+
+\begin{table}[H]
+  \centering
+  \caption{Số lượng ảnh và label theo từng split}
+  \label{tab:dataset_split}
+  \begin{tabular}{@{}lrrr@{}}
+    \toprule
+    \textbf{Split} & \textbf{Số ảnh} & \textbf{Số file label} & \textbf{Tỷ lệ} \\
+    \midrule
+    Train & 4308 & 4308 & 70.0\% \\
+    Validation & 1231 & 1231 & 20.0\% \\
+    Test & 616 & 616 & 10.0\% \\
+    \midrule
+    Tổng & 6155 & 6155 & 100\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Số lượng instance theo class được trình bày trong Bảng~\ref{tab:dataset_class_distribution}.
+Một ảnh có thể chứa nhiều người, vì vậy số instance lớn hơn số ảnh.
+
+\begin{table}[H]
+  \centering
+  \caption{Phân phối instance theo class}
+  \label{tab:dataset_class_distribution}
+  \begin{tabular}{@{}lrrr@{}}
+    \toprule
+    \textbf{Split} & \textbf{\texttt{no\_fall}} & \textbf{\texttt{fall}} & \textbf{Tổng instance} \\
+    \midrule
+    Train & 3773 & 2451 & 6224 \\
+    Validation & 1271 & 791 & 2062 \\
+    Test & 592 & 392 & 984 \\
+    \midrule
+    Tổng & 5636 & 3634 & 9270 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Tỷ lệ instance \texttt{no\_fall} cao hơn \texttt{fall}, nhưng mức chênh lệch không quá lớn sau khi gộp class \textit{Sleeping} vào nhóm \texttt{fall}.
+Việc này giúp giảm mất cân bằng dữ liệu ở lớp té ngã, đồng thời tạo thêm mẫu tư thế nằm/thấp để mô hình học các đặc trưng hình học gần với trạng thái nguy hiểm.
+Tuy nhiên, quyết định này cũng có thể làm tăng nguy cơ nhầm lẫn giữa ngủ/nằm nghỉ và té ngã, nên cần kết hợp hậu xử lý trong ứng dụng thực tế.
+
+Về kích thước ảnh, dataset không hoàn toàn đồng nhất.
+Phần lớn ảnh có kích thước \texttt{640x640}, trong khi một phần nhỏ có kích thước \texttt{1080x1920}.
+Thống kê kích thước ảnh được trình bày trong Bảng~\ref{tab:image_sizes}.
+
+\begin{table}[H]
+  \centering
+  \caption{Thống kê kích thước ảnh trong dataset}
+  \label{tab:image_sizes}
+  \begin{tabular}{@{}lrr@{}}
+    \toprule
+    \textbf{Split} & \textbf{640x640} & \textbf{1080x1920} \\
+    \midrule
+    Train & 3937 & 371 \\
+    Validation & 1154 & 77 \\
+    Test & 577 & 39 \\
+    \midrule
+    Tổng & 5668 & 487 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Trong quá trình kiểm tra dataset, các file label đều có định dạng YOLO Pose hợp lệ với 59 giá trị trên mỗi instance.
+Notebook kiểm tra dữ liệu cũng ghi nhận không có dòng label sai định dạng hoặc sai class.
+Ngoài ra, quá trình kiểm tra trùng lặp giữa các split cho thấy không có data leak giữa train-validation và train-test.
+
+\subsection{Tiền xử lý và Data Augmentation}
+
+\subsubsection{Tiền xử lý}
+Dataset không được cấu hình augmentation sẵn trên Roboflow trước khi huấn luyện.
+Các bước tiền xử lý chính được thực hiện trong pipeline huấn luyện của Ultralytics YOLO.
+\begin{itemize}[nosep]
+  \item Kiểm tra cấu trúc thư mục, số lượng ảnh và file label theo từng split.
+  \item Kiểm tra \texttt{nc}, \texttt{names}, \texttt{kpt\_shape} và \texttt{flip\_idx} trong file \texttt{data.yaml}.
+  \item Kiểm tra số lượng giá trị trong từng dòng label, đảm bảo mỗi instance có 59 giá trị.
+  \item Resize ảnh trong lúc train theo tham số \texttt{imgsz=960}.
+  \item Normalize pixel values về $[0, 1]$.
+\end{itemize}
+
+Việc resize được thực hiện ở runtime bởi YOLO thay vì tạo sẵn một bản dataset resize cố định.
+Cách làm này giữ lại dữ liệu gốc trong thư mục dataset, đồng thời cho phép thay đổi \texttt{imgsz} khi thử nghiệm các cấu hình huấn luyện khác nhau.
+
+\subsubsection{Data Augmentation cho Keypoint Data}
+Trong quá trình train trên Kaggle, các augmentation được áp dụng bởi Ultralytics YOLO, không phải augmentation được tạo sẵn từ Roboflow.
+Các phép biến đổi cần đảm bảo bounding box và keypoint được cập nhật tương ứng sau khi ảnh thay đổi.
+Một số cấu hình đáng chú ý trong lần train gồm:
+\begin{itemize}
+  \item \textbf{Horizontal Flip}: lật ngang với xác suất \texttt{fliplr=0.5}, kết hợp \texttt{flip\_idx} để hoán đổi keypoint trái/phải.
+  \item \textbf{HSV Augmentation}: thay đổi nhẹ màu sắc với \texttt{hsv\_h=0.005}, \texttt{hsv\_s=0.4}, \texttt{hsv\_v=0.15}.
+  \item \textbf{Scale}: thay đổi tỷ lệ ảnh với \texttt{scale=0.4}, giúp mô hình thích nghi với người ở nhiều khoảng cách camera.
+  \item \textbf{Mosaic}: sử dụng mức thấp \texttt{mosaic=0.1} để tăng đa dạng bối cảnh nhưng không làm biến dạng quá mạnh cấu trúc pose.
+  \item \textbf{Vertical Flip}: không sử dụng, với \texttt{flipud=0.0}, vì lật dọc tạo ra tư thế không tự nhiên.
+  \item \textbf{MixUp, CutMix, Copy-Paste}: không sử dụng trong cấu hình train này.
+\end{itemize}
+
+Việc hạn chế các augmentation mạnh là cần thiết với dữ liệu keypoint.
+Nếu biến đổi ảnh quá mạnh, quan hệ hình học giữa các khớp có thể trở nên kém tự nhiên và làm mô hình học sai tư thế người.
+Do đó, pipeline ưu tiên các phép biến đổi vừa phải, phù hợp với bài toán phát hiện té ngã dựa trên pose.
+
+% ============================================================
+%  CHƯƠNG 4 — PIPELINE FINE-TUNE
+% ============================================================
+\section{Pipeline Fine-tune}
+\label{sec:pipeline}
+
+\subsection{Tổng quan Pipeline}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance = 0.6cm and 1.2cm,
+  box/.style = {rectangle, draw, rounded corners=4pt,
+                minimum width=2.8cm, minimum height=0.8cm,
+                align=center, font=\small},
+  arr/.style = {-{Stealth}, thick}
+]
+  \node[box, fill=blue!15]   (data)    {Dataset\\(Images + Labels)};
+  \node[box, fill=orange!20, right=of data]  (pre)     {Tiền xử lý\\(Resize, Norm)};
+  \node[box, fill=green!20,  right=of pre]   (aug)     {Data\\Augmentation};
+  \node[box, fill=red!15,    right=of aug]   (model)   {\texttt{yolo11s-pose.pt}\\(Pretrained)};
+  \node[box, fill=purple!20, below=of model] (train)   {Fine-tune\\(Training Loop)};
+  \node[box, fill=yellow!20, left=of train]  (eval)    {Đánh giá\\(mAP, OKS)};
+  \node[box, fill=gray!20,   left=of eval]   (result)  {Kết quả\\(Weights, Metrics)};
+
+  \draw[arr] (data) -- (pre);
+  \draw[arr] (pre)  -- (aug);
+  \draw[arr] (aug)  -- (model);
+  \draw[arr] (model) -- (train);
+  \draw[arr] (train) -- (eval);
+  \draw[arr] (eval)  -- (result);
+\end{tikzpicture}
+\caption{Pipeline fine-tune tổng quan}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Cấu hình Thực nghiệm}
+
+\subsubsection{Môi trường}
+\begin{table}[H]
+  \centering
+  \caption{Cấu hình môi trường thực nghiệm}
+  \label{tab:env}
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    \textbf{Thành phần} & \textbf{Giá trị} \\
+    \midrule
+    GPU       & [Tên GPU — ví dụ: NVIDIA RTX 3060] \\
+    CUDA      & [phiên bản] \\
+    Python    & [phiên bản] \\
+    PyTorch   & [phiên bản] \\
+    Ultralytics YOLO & [phiên bản] \\
+    OS        & [Ubuntu / Windows / Colab...] \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Hyperparameters}
+\begin{table}[H]
+  \centering
+  \caption{Hyperparameters fine-tune}
+  \label{tab:hyperparams}
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    \textbf{Hyperparameter} & \textbf{Giá trị} & \textbf{Lý do chọn} \\
+    \midrule
+    \texttt{epochs}       & [x]        & [Giải thích] \\
+    \texttt{batch}        & [x]        & [Giải thích] \\
+    \texttt{imgsz}        & 640        & Phù hợp với pretrained \\
+    \texttt{lr0}          & 0.01       & LR ban đầu \\
+    \texttt{lrf}          & 0.01       & LR cuối = lr0 * lrf \\
+    \texttt{optimizer}    & SGD        & Mặc định YOLO11 \\
+    \texttt{weight\_decay}& 0.0005     & Regularization \\
+    \texttt{warmup\_epochs}& 3         & Ổn định đầu training \\
+    \texttt{patience}     & [x]        & Early stopping \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Code Fine-tune}
+\begin{lstlisting}[language=Python, caption={Script fine-tune với Ultralytics}]
+from ultralytics import YOLO
+
+# Load pretrained model
+model = YOLO("yolo11s-pose.pt")
+
+# Fine-tune
+results = model.train(
+    data    = "data.yaml",
+    epochs  = 100,
+    batch   = 16,
+    imgsz   = 640,
+    lr0     = 0.01,
+    lrf     = 0.01,
+    optimizer = "SGD",
+    weight_decay = 0.0005,
+    warmup_epochs = 3,
+    patience = 20,
+    project = "fall_detection",
+    name    = "yolo11s_pose_ft",
+    save    = True,
+    plots   = True,
+)
+\end{lstlisting}
+
+\subsection{Chiến lược Fine-tune}
+
+\subsubsection{Freeze / Unfreeze}
+% TODO: Điền chiến lược bạn thực sự dùng
+\begin{itemize}
+  \item \textbf{Phương án 1 — Fine-tune toàn bộ}: Unfreeze tất cả layers, LR nhỏ để tránh catastrophic forgetting.
+  \item \textbf{Phương án 2 — Freeze Backbone}: Chỉ train Neck và Head trong một số epoch đầu, sau đó unfreeze dần.
+\end{itemize}
+
+Đề tài này sử dụng phương án [x] vì [lý do].
+
+\subsubsection{Model Checkpoint và Early Stopping}
+\begin{itemize}[nosep]
+  \item Lưu \texttt{best.pt} dựa trên mAP@50 trên tập validation.
+  \item Early stopping với \texttt{patience = [x]} epoch không cải thiện.
+\end{itemize}
+
+\subsection{Quá trình Huấn luyện}
+
+Mỗi iteration trong training loop bao gồm:
+\begin{enumerate}[nosep]
+  \item \textbf{Forward pass}: ảnh đầu vào $\rightarrow$ backbone $\rightarrow$ neck $\rightarrow$ head $\rightarrow$ predictions.
+  \item \textbf{Loss computation}: tính $\mathcal{L}_{total}$ theo Phương trình~\ref{eq:total_loss}.
+  \item \textbf{Backward pass}: tính gradient $\nabla_\theta \mathcal{L}$.
+  \item \textbf{Parameter update}: $\theta \leftarrow \theta - \eta \nabla_\theta \mathcal{L}$.
+\end{enumerate}
+
+% ============================================================
+%  CHƯƠNG 5 — THỰC NGHIỆM VÀ KẾT QUẢ
+% ============================================================
+\section{Thực nghiệm và Kết quả}
+\label{sec:experiments}
+
+\subsection{Kết quả Huấn luyện}
+
+\subsubsection{Loss Curves}
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=\textwidth]{results/loss_curves.png}
+  \fbox{\parbox{0.9\textwidth}{\centering [Placeholder: Đồ thị Train/Val Loss — box\_loss, cls\_loss, dfl\_loss, kpt\_loss]}}
+  \caption{Loss curves trong quá trình training}
+  \label{fig:loss_curves}
+\end{figure}
+
+\subsubsection{Metrics Curves}
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=\textwidth]{results/metrics_curves.png}
+  \fbox{\parbox{0.9\textwidth}{\centering [Placeholder: Đồ thị mAP@50, mAP@50-95, Precision, Recall theo epoch]}}
+  \caption{Metrics trong quá trình training}
+  \label{fig:metrics_curves}
+\end{figure}
+
+\noindent \textbf{Nhận xét:} [Mô tả xu hướng hội tụ, có overfitting không, epoch tốt nhất...]
+
+\subsection{Kết quả Đánh giá trên Tập Test}
+
+\begin{table}[H]
+  \centering
+  \caption{Kết quả đánh giá mô hình trên tập test}
+  \label{tab:results}
+  \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    \textbf{Model} & \textbf{mAP@50} & \textbf{mAP@50-95} & \textbf{Precision} & \textbf{Recall} \\
+    \midrule
+    \texttt{yolo11s-pose.pt} (zero-shot) & -- & -- & -- & -- \\
+    \texttt{yolo11s-pose.pt} (fine-tuned) & [x]\% & [x]\% & [x]\% & [x]\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsubsection{Precision-Recall Curve}
+\begin{figure}[H]
+  \centering
+  % \includegraphics[width=0.7\textwidth]{results/PR_curve.png}
+  \fbox{\parbox{0.7\textwidth}{\centering [Placeholder: PR Curve]}}
+  \caption{Precision-Recall Curve trên tập test}
+  \label{fig:pr_curve}
+\end{figure}
+
+\subsection{Phân tích Định tính — Kết quả Inference}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}[b]{0.45\textwidth}
+    \fbox{\parbox{\textwidth}{\centering [Placeholder: True Positive — phát hiện đúng té ngã]}}
+    \caption{True Positive}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[b]{0.45\textwidth}
+    \fbox{\parbox{\textwidth}{\centering [Placeholder: False Negative — bỏ sót]}}
+    \caption{False Negative}
+  \end{subfigure}
+  \caption{Minh họa kết quả inference}
+  \label{fig:inference}
+\end{figure}
+
+\subsection{Phân tích Lỗi (Error Analysis)}
+
+\begin{itemize}
+  \item \textbf{False Positive:} [Mô tả trường hợp — ví dụ: người ngồi bị nhận nhầm là té ngã]
+  \item \textbf{False Negative:} [Mô tả — ví dụ: té ngã ở góc khuất bị bỏ sót do occlusion]
+  \item \textbf{Nguyên nhân chính:} [Phân tích — dataset nhỏ, góc camera hạn chế, ...]
+\end{itemize}
+
+\subsection{Ablation Study (nếu có)}
+
+\begin{table}[H]
+  \centering
+  \caption{So sánh các cấu hình fine-tune}
+  \label{tab:ablation}
+  \begin{tabular}{@{}lcccc@{}}
+    \toprule
+    \textbf{Cấu hình} & \textbf{Freeze} & \textbf{LR} & \textbf{Epochs} & \textbf{mAP@50} \\
+    \midrule
+    Baseline (no fine-tune) & -- & -- & -- & [x]\% \\
+    Fine-tune, freeze backbone & Backbone & 0.001 & 50 & [x]\% \\
+    Fine-tune toàn bộ & None & 0.01 & 100 & [x]\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ============================================================
+%  CHƯƠNG 6 — KẾT LUẬN
+% ============================================================
+\section{Kết luận và Hướng Phát triển}
+\label{sec:conclusion}
+
+\subsection{Kết luận}
+Đề tài đã thực hiện thành công pipeline fine-tune mô hình \texttt{yolo11s-pose.pt} cho bài toán phát hiện té ngã, bao gồm:
+\begin{itemize}[nosep]
+  \item Nghiên cứu và trình bày cơ sở lý thuyết về YOLO11, Pose Estimation, và Transfer Learning.
+  \item Xây dựng và phân tích dataset dạng keypoint với định dạng YOLO Pose.
+  \item Thiết kế pipeline fine-tune với cấu hình hyperparameter phù hợp.
+  \item Đánh giá mô hình đạt được mAP@50 = [x]\% trên tập test.
+\end{itemize}
+
+\subsection{Hạn chế}
+\begin{itemize}[nosep]
+  \item Dataset còn hạn chế về số lượng và độ đa dạng (góc camera, ánh sáng).
+  \item Mô hình chưa được kiểm nghiệm trên video thực tế.
+  \item Chưa tối ưu cho thiết bị edge (inference speed, model size).
+\end{itemize}
+
+\subsection{Hướng Phát triển}
+\begin{itemize}[nosep]
+  \item Thu thập thêm dữ liệu đa góc nhìn, đa môi trường.
+  \item Thử nghiệm \texttt{yolo11l-pose.pt} hoặc các model lớn hơn.
+  \item Kết hợp thông tin temporal (LSTM, Transformer) để phân tích chuỗi frame.
+  \item Tối ưu hóa mô hình bằng quantization/pruning để triển khai trên thiết bị nhúng.
+\end{itemize}
+
+% ============================================================
+%  TÀI LIỆU THAM KHẢO
+% ============================================================
+\newpage
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+% Fallback nếu chưa có file .bib
+\begin{thebibliography}{99}
+
+\bibitem{redmon2016yolo}
+J. Redmon, S. Divvala, R. Girshick, and A. Farhadi,
+``You Only Look Once: Unified, Real-Time Object Detection,''
+in \textit{Proc. IEEE CVPR}, 2016, pp. 779--788.
+
+\bibitem{ren2015faster}
+S. Ren, K. He, R. Girshick, and J. Sun,
+``Faster R-CNN: Towards Real-Time Object Detection with Region Proposal Networks,''
+in \textit{Advances in Neural Information Processing Systems (NeurIPS)}, 2015.
+
+\bibitem{li2020generalized}
+X. Li \textit{et al.},
+``Generalized Focal Loss: Learning Qualified and Distributed Bounding Boxes for Dense Object Detection,''
+in \textit{Advances in Neural Information Processing Systems (NeurIPS)}, 2020.
+
+\bibitem{lin2014coco}
+T.-Y. Lin \textit{et al.},
+``Microsoft COCO: Common Objects in Context,''
+in \textit{Proc. ECCV}, 2014.
+
+\bibitem{ultralytics2024yolo11}
+Ultralytics,
+``YOLO11: State-of-the-Art Object Detection,''
+\url{https://github.com/ultralytics/ultralytics}, 2024.
+
+\bibitem{cao2017openpose}
+Z. Cao, T. Simon, S.-E. Wei, and Y. Sheikh,
+``Realtime Multi-Person 2D Pose Estimation using Part Affinity Fields,''
+in \textit{Proc. IEEE CVPR}, 2017.
+
+\end{thebibliography}
+
+\end{document}
