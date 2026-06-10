@@ -1,10 +1,12 @@
 \babel@toc {english}{}\relax 
-\contentsline {table}{\numberline {1}{\ignorespaces Tóm tắt một số phiên bản tiêu biểu của họ mô hình YOLO}}{7}{table.caption.4}%
-\contentsline {table}{\numberline {2}{\ignorespaces Thông tin tổng quan dataset}}{17}{table.caption.5}%
-\contentsline {table}{\numberline {3}{\ignorespaces Số lượng ảnh và label theo từng split}}{19}{table.caption.6}%
-\contentsline {table}{\numberline {4}{\ignorespaces Phân phối instance theo class}}{19}{table.caption.7}%
-\contentsline {table}{\numberline {5}{\ignorespaces Thống kê kích thước ảnh trong dataset}}{20}{table.caption.8}%
-\contentsline {table}{\numberline {6}{\ignorespaces Cấu hình môi trường thực nghiệm}}{22}{table.caption.10}%
-\contentsline {table}{\numberline {7}{\ignorespaces Hyperparameters fine-tune}}{22}{table.caption.11}%
-\contentsline {table}{\numberline {8}{\ignorespaces Kết quả đánh giá mô hình trên tập test}}{24}{table.caption.14}%
-\contentsline {table}{\numberline {9}{\ignorespaces So sánh các cấu hình fine-tune}}{25}{table.caption.17}%
+\contentsline {table}{\numberline {1}{\ignorespaces Tóm tắt một số phiên bản tiêu biểu của họ mô hình YOLO}}{4}{table.caption.4}%
+\contentsline {table}{\numberline {2}{\ignorespaces Thông tin tổng quan dataset}}{14}{table.caption.5}%
+\contentsline {table}{\numberline {3}{\ignorespaces Số lượng ảnh và label theo từng split}}{16}{table.caption.6}%
+\contentsline {table}{\numberline {4}{\ignorespaces Phân phối instance theo class}}{16}{table.caption.7}%
+\contentsline {table}{\numberline {5}{\ignorespaces Thống kê kích thước ảnh trong dataset}}{17}{table.caption.8}%
+\contentsline {table}{\numberline {6}{\ignorespaces Cấu hình môi trường thực nghiệm}}{19}{table.caption.10}%
+\contentsline {table}{\numberline {7}{\ignorespaces Hyperparameters fine-tune}}{20}{table.caption.11}%
+\contentsline {table}{\numberline {8}{\ignorespaces Cấu hình augmentation trong quá trình fine-tune}}{21}{table.caption.12}%
+\contentsline {table}{\numberline {9}{\ignorespaces Một số mốc kết quả validation trong quá trình train}}{25}{table.caption.14}%
+\contentsline {table}{\numberline {10}{\ignorespaces Kết quả đánh giá định lượng mô hình trên tập dữ liệu kiểm thử độc lập}}{26}{table.caption.15}%
+\contentsline {table}{\numberline {11}{\ignorespaces Kết quả chi tiết theo class trên tập test}}{26}{table.caption.16}%

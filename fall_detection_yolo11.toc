@@ -1,0 +1,68 @@
+\babel@toc {english}{}\relax 
+\contentsline {section}{\numberline {1}Giới thiệu}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Đặt vấn đề}{1}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}Mục tiêu đề tài}{1}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Phạm vi đề tài}{1}{subsection.1.3}%
+\contentsline {subsection}{\numberline {1.4}Cấu trúc bài báo cáo}{2}{subsection.1.4}%
+\contentsline {section}{\numberline {2}Cơ sở lý thuyết}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Object detection và one-stage detector}{2}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}Tổng quan object detection}{2}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2}Two-stage detector và one-stage detector}{3}{subsubsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.3}Anchor-based và anchor-free detector}{3}{subsubsection.2.1.3}%
+\contentsline {subsection}{\numberline {2.2}Tổng quan họ mô hình YOLO}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Kiến trúc YOLO11-Pose}{4}{subsection.2.3}%
+\contentsline {subsubsection}{\numberline {2.3.1}Backbone - trích xuất đặc trưng}{5}{subsubsection.2.3.1}%
+\contentsline {subsubsection}{\numberline {2.3.2}Neck - tổng hợp đặc trưng đa tỷ lệ}{5}{subsubsection.2.3.2}%
+\contentsline {subsubsection}{\numberline {2.3.3}Detection head và keypoint head}{5}{subsubsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.4}Human pose estimation và keypoint detection}{6}{subsection.2.4}%
+\contentsline {subsubsection}{\numberline {2.4.1}Tổng quan human pose estimation (HPE)}{6}{subsubsection.2.4.1}%
+\contentsline {subsubsection}{\numberline {2.4.2}Chuẩn COCO 17 keypoints và biến thể 18 keypoints}{6}{subsubsection.2.4.2}%
+\contentsline {subsubsection}{\numberline {2.4.3}Visibility flag}{7}{subsubsection.2.4.3}%
+\contentsline {subsection}{\numberline {2.5}Bài toán phát hiện té ngã dựa trên tư thế người}{8}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Các hàm loss trong YOLO11-Pose}{8}{subsection.2.6}%
+\contentsline {subsubsection}{\numberline {2.6.1}Bounding box loss}{9}{subsubsection.2.6.1}%
+\contentsline {subsubsection}{\numberline {2.6.2}Classification loss}{9}{subsubsection.2.6.2}%
+\contentsline {subsubsection}{\numberline {2.6.3}Keypoint loss và OKS}{9}{subsubsection.2.6.3}%
+\contentsline {subsection}{\numberline {2.7}Transfer learning và fine-tuning}{10}{subsection.2.7}%
+\contentsline {subsubsection}{\numberline {2.7.1}Transfer learning}{10}{subsubsection.2.7.1}%
+\contentsline {subsubsection}{\numberline {2.7.2}Feature extraction vs fine-tuning}{10}{subsubsection.2.7.2}%
+\contentsline {subsubsection}{\numberline {2.7.3}Pretrained \texttt {yolo11s-pose.pt}}{11}{subsubsection.2.7.3}%
+\contentsline {subsubsection}{\numberline {2.7.4}Tránh catastrophic forgetting}{11}{subsubsection.2.7.4}%
+\contentsline {subsection}{\numberline {2.8}Kỹ thuật tối ưu hóa}{11}{subsection.2.8}%
+\contentsline {subsubsection}{\numberline {2.8.1}Optimizer}{11}{subsubsection.2.8.1}%
+\contentsline {subsubsection}{\numberline {2.8.2}Learning rate scheduling}{12}{subsubsection.2.8.2}%
+\contentsline {subsubsection}{\numberline {2.8.3}Regularization và early stopping}{12}{subsubsection.2.8.3}%
+\contentsline {subsection}{\numberline {2.9}Các độ đo đánh giá mô hình}{12}{subsection.2.9}%
+\contentsline {subsubsection}{\numberline {2.9.1}Precision, recall, F1-score}{12}{subsubsection.2.9.1}%
+\contentsline {subsubsection}{\numberline {2.9.2}Mean average precision (mAP)}{13}{subsubsection.2.9.2}%
+\contentsline {subsubsection}{\numberline {2.9.3}Object keypoint similarity (OKS)}{13}{subsubsection.2.9.3}%
+\contentsline {section}{\numberline {3}Dataset}{14}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Mô tả dataset}{14}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Cấu trúc thư mục và file cấu hình}{14}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Định dạng annotation - YOLO keypoint}{15}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Phân tích và thống kê dataset}{16}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Tiền xử lý và data augmentation}{17}{subsection.3.5}%
+\contentsline {subsubsection}{\numberline {3.5.1}Tiền xử lý}{17}{subsubsection.3.5.1}%
+\contentsline {subsubsection}{\numberline {3.5.2}Data augmentation cho keypoint data}{17}{subsubsection.3.5.2}%
+\contentsline {section}{\numberline {4}Pipeline fine-tune}{18}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Tổng quan pipeline}{18}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Cấu hình thực nghiệm}{18}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Môi trường}{18}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Hyperparameters}{20}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}Code fine-tune}{21}{subsubsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.3}Chiến lược fine-tune}{22}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Fine-tune toàn bộ mô hình}{22}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Giám sát trọng số và dừng sớm}{23}{subsubsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.4}Chi tiết tiến trình và quá trình huấn luyện}{23}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Thực nghiệm và kết quả}{24}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Kết quả huấn luyện và sự hội tụ}{24}{subsection.5.1}%
+\contentsline {subsubsection}{\numberline {5.1.1}Phân tích đồ thị loss}{24}{subsubsection.5.1.1}%
+\contentsline {subsubsection}{\numberline {5.1.2}Phân tích metric trên tập validation}{25}{subsubsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.2}Kết quả đánh giá định lượng trên tập kiểm thử độc lập}{25}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Phân tích đường cong precision-recall}{26}{subsubsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.3}Phân tích định tính và kết quả thử nghiệm inference trực quan}{27}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Phân tích chi tiết lỗi}{28}{subsection.5.4}%
+\contentsline {section}{\numberline {6}Kết luận và hướng phát triển}{29}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Kết luận}{29}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Hạn chế}{30}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Hướng phát triển}{30}{subsection.6.3}%
