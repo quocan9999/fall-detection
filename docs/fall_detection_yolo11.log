@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.6.9)  10 JUN 2026 14:52
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (MiKTeX 25.12) (preloaded format=pdflatex 2026.6.9)  10 JUN 2026 17:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1063,66 +1063,111 @@ File: t5cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
  [3] [1] [2] [3] [4] [5] [6] [7] [8] [9]
 LaTeX Font Info:    Font shape `T5/cmtt/bx/n' in size <12> not available
 (Font)              Font shape `T5/cmtt/m/n' tried instead on input line 512.
- [10] [11] [12] [13]
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 661.
- [14] (C:\Program Files\MiKTeX\tex/latex/listings\lstlang1.sty
+ [10] [11] [12] [13] [14]
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 681.
+ [15] (C:\Program Files\MiKTeX\tex/latex/listings\lstlang1.sty
 File: lstlang1.sty 2025/11/14 1.11b listings language file
-) [15] [16] [17] [18] [19] [20]
+) [16] [17] [18] [19] [20] [21]
 LaTeX Font Info:    Font shape `T5/cmtt/bx/n' in size <10> not available
-(Font)              Font shape `T5/cmtt/m/n' tried instead on input line 955.
- [21] [22] [23]
-<assets/images/results.png, id=613, 1445.4pt x 433.62pt>
+(Font)              Font shape `T5/cmtt/m/n' tried instead on input line 976.
+ [22] [23] [24]
+<assets/images/results.png, id=645, 1445.4pt x 433.62pt>
 File: assets/images/results.png Graphic file (type png)
 <use assets/images/results.png>
-Package pdftex.def Info: assets/images/results.png  used on input line 1102.
+Package pdftex.def Info: assets/images/results.png  used on input line 1123.
 (pdftex.def)             Requested size: 441.01773pt x 132.30353pt.
- [24] [25 <./assets/images/results.png>]
-<assets/images/BoxPR_curve.png, id=631, 650.43pt x 433.62pt>
+ [25] [26 <./assets/images/results.png>]
+<assets/images/BoxPR_curve.png, id=663, 650.43pt x 433.62pt>
 File: assets/images/BoxPR_curve.png Graphic file (type png)
 <use assets/images/BoxPR_curve.png>
-Package pdftex.def Info: assets/images/BoxPR_curve.png  used on input line 1195.
+Package pdftex.def Info: assets/images/BoxPR_curve.png  used on input line 1216.
 (pdftex.def)             Requested size: 211.68661pt x 141.12332pt.
-<assets/images/PosePR_curve.png, id=632, 650.43pt x 433.62pt>
+<assets/images/PosePR_curve.png, id=664, 650.43pt x 433.62pt>
 File: assets/images/PosePR_curve.png Graphic file (type png)
 <use assets/images/PosePR_curve.png>
-Package pdftex.def Info: assets/images/PosePR_curve.png  used on input line 1201.
+Package pdftex.def Info: assets/images/PosePR_curve.png  used on input line 1222.
 (pdftex.def)             Requested size: 211.68661pt x 141.12332pt.
- [26 <./assets/images/BoxPR_curve.png> <./assets/images/PosePR_curve.png>]
-<assets/images/confusion_matrix_normalized.png, id=639, 867.24pt x 650.43pt>
+ [27 <./assets/images/BoxPR_curve.png> <./assets/images/PosePR_curve.png>]
+<assets/images/confusion_matrix_normalized.png, id=672, 867.24pt x 650.43pt>
 File: assets/images/confusion_matrix_normalized.png Graphic file (type png)
 <use assets/images/confusion_matrix_normalized.png>
-Package pdftex.def Info: assets/images/confusion_matrix_normalized.png  used on input line 1213.
+Package pdftex.def Info: assets/images/confusion_matrix_normalized.png  used on input line 1234.
 (pdftex.def)             Requested size: 317.5333pt x 238.1543pt.
-<assets/images/val_batch0_pred.jpg, id=641, 1927.2pt x 1927.2pt>
+<assets/images/val_batch0_pred.jpg, id=674, 1927.2pt x 1927.2pt>
 File: assets/images/val_batch0_pred.jpg Graphic file (type jpg)
 <use assets/images/val_batch0_pred.jpg>
-Package pdftex.def Info: assets/images/val_batch0_pred.jpg  used on input line 1227.
+Package pdftex.def Info: assets/images/val_batch0_pred.jpg  used on input line 1248.
 (pdftex.def)             Requested size: 216.1011pt x 216.08018pt.
-<assets/images/val_batch2_pred.jpg, id=642, 1927.2pt x 1927.2pt>
+<assets/images/val_batch2_pred.jpg, id=675, 1927.2pt x 1927.2pt>
 File: assets/images/val_batch2_pred.jpg Graphic file (type jpg)
 <use assets/images/val_batch2_pred.jpg>
-Package pdftex.def Info: assets/images/val_batch2_pred.jpg  used on input line 1233.
+Package pdftex.def Info: assets/images/val_batch2_pred.jpg  used on input line 1254.
 (pdftex.def)             Requested size: 216.1011pt x 216.08018pt.
- [27 <./assets/images/confusion_matrix_normalized.png>] [28 <./assets/images/val_batch0_pred.jpg> <./assets/images/val_batch2_pred.jpg>] [29] [30] [31] (fall_detection_yolo11.aux)
+ [28 <./assets/images/confusion_matrix_normalized.png>] [29 <./assets/images/val_batch0_pred.jpg> <./assets/images/val_batch2_pred.jpg>] [30] [31]
+Underfull \hbox (badness 1184) in paragraph at lines 1362--1362
+\T5/cmr/m/n/12 £nh. 6 la-bels: falling (2322), sit-ting
+ []
+
+
+Underfull \hbox (badness 6691) in paragraph at lines 1362--1362
+\T5/cmr/m/n/12 (2000), sleep-ing(2422), stand-ing(2246),
+ []
+
+
+Underfull \hbox (badness 3068) in paragraph at lines 1362--1362
+\T5/cmr/m/n/12 (hue, sat-u-ra-tion, bright-ness, ex-po-sure,
+ []
+
+
+Underfull \hbox (badness 1565) in paragraph at lines 1362--1362
+[]\T5/cmr/m/n/12 Chia train/val/test l  70/20/10 v  t£i
+ []
+
+
+Underfull \hbox (badness 1184) in paragraph at lines 1362--1362
+\T5/cmr/m/n/12 £nh. 6 la-bels: falling (2322), sit-ting
+ []
+
+
+Underfull \hbox (badness 6691) in paragraph at lines 1362--1362
+\T5/cmr/m/n/12 (2000), sleep-ing(2422), stand-ing(2246),
+ []
+
+
+Underfull \hbox (badness 1565) in paragraph at lines 1362--1362
+[]\T5/cmr/m/n/12 Chia train/val/test l  70/20/10 v  t£i
+ []
+
+[32]
+Underfull \hbox (badness 1910) in paragraph at lines 1421--1421
+[]|\T5/cmr/m/n/12 T¼m hiºu c¡c chùc n«ng cõa Com-puter
+ []
+
+
+Underfull \hbox (badness 2980) in paragraph at lines 1421--1421
+\T5/cmr/m/n/12 Vi-sion(ph÷ìng ph¡p phi ti¸p xóc (non-
+ []
+
+[33] [34] (fall_detection_yolo11.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2025-12-24>
  ***********
 Package rerunfilecheck Info: File `fall_detection_yolo11.out' has not changed.
-(rerunfilecheck)             Checksum: 8DB0F32D215289AE9990A105D9DC7089;14122.
+(rerunfilecheck)             Checksum: 6F2DDE78B17AC171C82543B5DF680DD8;14597.
  ) 
 Here is how much of TeX's memory you used:
- 28336 strings out of 467871
- 514175 string characters out of 5428444
- 1226843 words of memory out of 5000000
- 56525 multiletter control sequences out of 15000+600000
+ 28353 strings out of 467871
+ 514464 string characters out of 5428444
+ 1227217 words of memory out of 5000000
+ 56527 multiletter control sequences out of 15000+600000
  651005 words of font info for 82 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  84i,13n,94p,614b,2075s stack positions out of 10000i,1000n,20000p,200000b,200000s
  <C:\Users\trinh\AppData\Local\MiKTeX\fonts/pk/ljfour/jknappen/ec/dpi600\tcrm1200.pk><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmex10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vnbx10.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vnbx12.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vnr10.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vnr12.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vnr6.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vnr8.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vnti12.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vntt10.pfb><C:/Users/trinh/AppData/Roaming/MiKTeX/fonts/type1/vntex/vnr/vntt12.pfb>
-Output written on fall_detection_yolo11.pdf (35 pages, 2138531 bytes).
+Output written on fall_detection_yolo11.pdf (38 pages, 2152840 bytes).
 PDF statistics:
- 796 PDF objects out of 1000 (max. 8388607)
- 222 named destinations out of 1000 (max. 500000)
- 579 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 843 PDF objects out of 1000 (max. 8388607)
+ 237 named destinations out of 1000 (max. 500000)
+ 603 words of extra memory for PDF output out of 10000 (max. 10000000)
 

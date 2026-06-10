@@ -1,6 +1,6 @@
 \babel@toc {english}{}\relax 
-\contentsline {figure}{\numberline {1}{\ignorespaces Pipeline fine-tune tổng quan}}{18}{figure.caption.9}%
-\contentsline {figure}{\numberline {2}{\ignorespaces Các đường loss và metric trong quá trình huấn luyện}}{25}{figure.caption.13}%
-\contentsline {figure}{\numberline {3}{\ignorespaces Đường cong Precision-Recall trên tập test}}{26}{figure.caption.17}%
-\contentsline {figure}{\numberline {4}{\ignorespaces Confusion matrix chuẩn hóa trên tập test}}{27}{figure.caption.18}%
-\contentsline {figure}{\numberline {5}{\ignorespaces Kết quả inference trực quan trên test split}}{28}{figure.caption.19}%
+\contentsline {figure}{\numberline {1}{\ignorespaces Pipeline fine-tune tổng quan}}{19}{figure.caption.9}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Các đường loss và metric trong quá trình huấn luyện}}{26}{figure.caption.13}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Đường cong Precision-Recall trên tập test}}{27}{figure.caption.17}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Confusion matrix chuẩn hóa trên tập test}}{28}{figure.caption.18}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Kết quả inference trực quan trên test split}}{29}{figure.caption.19}%

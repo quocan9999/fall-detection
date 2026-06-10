@@ -617,7 +617,7 @@ Vì vậy, ngoài mAP cho bounding box, các chỉ số liên quan đến keypoi
 \label{sec:dataset}
 
 \subsection{Mô tả dataset}
-Dataset ban đầu được tải từ Roboflow Universe, version 7.
+Dataset ban đầu được tải từ \href{https://universe.roboflow.com/freelance-v0zzk/fall-detection-hxwtc}{Roboflow Universe}, version 7.
 Tuy nhiên, dataset sử dụng trong đồ án không giữ nguyên hoàn toàn như bản tải về ban đầu.
 Nhóm đã xử lý lại dữ liệu để phù hợp với bài toán huấn luyện YOLO11s-Pose, bao gồm gộp nhãn, kiểm tra định dạng label, loại bỏ hoặc sửa các mẫu lỗi và kiểm tra trùng lặp dữ liệu giữa các tập train, validation và test.
 
@@ -653,6 +653,26 @@ Dataset dùng biến thể \textbf{18 keypoints} có thêm điểm \textit{Neck}
     \bottomrule
   \end{tabular}
 \end{table}
+
+\subsection{Quy trình xử lý dataset gốc}
+
+Dataset dùng để huấn luyện không được lấy trực tiếp từ bản tải về ban đầu, mà được tạo thông qua một pipeline xử lý dữ liệu riêng.
+Các script xử lý được đặt trong thư mục \path{script-train/script-xu-ly-dataset/}.
+Dataset gốc được đặt trong thư mục \path{origin-dataset/}, còn các kết quả trung gian, report kiểm tra và dataset clean được xuất ra thư mục \path{origin-dataset/outputs/}.
+Cách tổ chức này giúp tách rõ dữ liệu ban đầu, dữ liệu đã xử lý và các báo cáo kiểm tra sinh ra trong quá trình làm sạch.
+
+Quy trình xử lý chính gồm các bước sau:
+\begin{enumerate}[nosep]
+  \item \textbf{Làm sạch dataset gốc:} script \texttt{process\_dataset\_fastdup.py} đọc dataset gốc dạng YOLO Pose, kiểm tra cấu trúc \texttt{train/valid/test}, tạo manifest ảnh và label, sau đó phát hiện các ảnh trùng hoặc gần trùng bằng \textit{fastdup}. Nếu môi trường không chạy được \textit{fastdup}, script có cơ chế dự phòng bằng perceptual hash.
+  \item \textbf{Kiểm tra data leak giữa các split:} từ các cặp ảnh trùng/gần trùng, script xác định các trường hợp có nguy cơ rò rỉ dữ liệu giữa train-validation và train-test. Những mẫu gây leak được loại bỏ hoặc điều chỉnh trong quá trình tạo dataset clean.
+  \item \textbf{Tạo dataset clean 5 class:} sau khi xử lý trùng lặp và cân bằng lại split, script xuất dataset sạch \path{fall-detection-clean-fastdup} vào \path{origin-dataset/outputs/}. Dataset này vẫn giữ 5 class gốc và giữ nguyên định dạng keypoint.
+  \item \textbf{Chuyển từ 5 class sang 2 class:} script \path{convert_clean_pose_to_2class_sleeping_as_fall.py} chuyển dataset clean 5 class thành dataset 2 class. Mapping được sử dụng là \textit{Sitting}, \textit{Standing}, \textit{Walking} $\rightarrow$ \texttt{no\_fall}; \textit{Sleeping}, \textit{falling} $\rightarrow$ \texttt{fall}.
+  \item \textbf{Kiểm tra lại dataset sau chuyển đổi:} script chuyển đổi tiếp tục kiểm tra số lượng ảnh, số lượng label, số giá trị trong từng dòng annotation, \texttt{kpt\_shape}, \texttt{flip\_idx}, tỉ lệ split và đối chiếu bbox/keypoint giữa dataset 5 class và dataset 2 class.
+  \item \textbf{Trực quan hóa để kiểm tra keypoint:} script kiểm tra keypoint trên dataset 5 class và script trực quan hóa ngẫu nhiên trên dataset 2 class được dùng để vẽ bbox, class và chỉ số keypoint lên ảnh mẫu. Bước này giúp kiểm tra thứ tự 18 keypoints và phát hiện các lỗi trực quan trước khi đưa dataset vào huấn luyện.
+\end{enumerate}
+
+Kết quả cuối cùng của pipeline là dataset clean 2 class theo biến thể \textit{sleeping-as-fall}, sau đó được dùng làm dataset huấn luyện cho mô hình YOLO11s-Pose.
+Việc dùng script để xử lý dữ liệu giúp quá trình tạo dataset có thể lặp lại, đồng thời lưu lại các report cần thiết để kiểm tra nguồn gốc dữ liệu, data leak và tính hợp lệ của annotation.
 
 \subsection{Cấu trúc thư mục và file cấu hình}
 
@@ -853,16 +873,14 @@ Do đó, pipeline ưu tiên các phép biến đổi vừa phải, phù hợp v�
   arr/.style = {-{Stealth}, thick}
 ]
   \node[box, fill=blue!15]   (data)    {Dataset\\(Images + Labels)};
-  \node[box, fill=orange!20, right=of data]  (pre)     {Tiền xử lý\\(Resize, Norm)};
-  \node[box, fill=green!20,  right=of pre]   (aug)     {Data\\Augmentation};
-  \node[box, fill=red!15,    right=of aug]   (model)   {\texttt{yolo11s-pose.pt}\\(Pretrained)};
-  \node[box, fill=purple!20, below=of model] (train)   {Fine-tune\\(Training Loop)};
-  \node[box, fill=yellow!20, left=of train]  (eval)    {Đánh giá\\(mAP, OKS)};
-  \node[box, fill=gray!20,   left=of eval]   (result)  {Kết quả\\(Weights, Metrics)};
+  \node[box, fill=orange!20, right=of data]  (loader)  {Dataloader\\(Resize, Norm,\\Online Augmentation)};
+  \node[box, fill=red!15,    above right=0.6cm and 1.2cm of loader] (model) {\texttt{yolo11s-pose.pt}\\(Pretrained)};
+  \node[box, fill=purple!20, below right=0.6cm and 1.2cm of loader] (train) {Fine-tune\\(Training Loop)};
+  \node[box, fill=yellow!20, right=of train]  (eval)    {Đánh giá\\(mAP, OKS)};
+  \node[box, fill=gray!20,   right=of eval]   (result)  {Kết quả\\(Weights, Metrics)};
 
-  \draw[arr] (data) -- (pre);
-  \draw[arr] (pre)  -- (aug);
-  \draw[arr] (aug)  -- (model);
+  \draw[arr] (data) -- (loader);
+  \draw[arr] (loader) -- (train);
   \draw[arr] (model) -- (train);
   \draw[arr] (train) -- (eval);
   \draw[arr] (eval)  -- (result);
@@ -871,6 +889,9 @@ Do đó, pipeline ưu tiên các phép biến đổi vừa phải, phù hợp v�
 \caption{Pipeline fine-tune tổng quan}
 \label{fig:pipeline}
 \end{figure}
+
+Trong pipeline này, data augmentation được áp dụng theo cơ chế online trong quá trình huấn luyện thông qua dataloader của Ultralytics.
+Dataset lưu trên ổ đĩa không được augment sẵn; các phép biến đổi như HSV, scale, horizontal flip và mosaic được thực hiện ngẫu nhiên khi tạo batch train.
 
 \subsection{Cấu hình thực nghiệm}
 
@@ -1298,6 +1319,114 @@ Vì vậy, mô hình phù hợp để làm thành phần nhận diện ban đầ
   \item Tối ưu mô hình bằng các kỹ thuật như quantization, pruning hoặc export sang ONNX/TensorRT để phục vụ triển khai thực tế.
   \item Xây dựng và đánh giá hệ thống nhận diện hoàn chỉnh trên video, trong đó kết quả từ YOLO11-Pose được kết hợp với luật hậu xử lý nhằm giảm cảnh báo sai.
 \end{itemize}
+
+% ============================================================
+%  PHỤ LỤC
+% ============================================================
+\newpage
+\appendix
+\section{Phân công công việc}
+
+\begin{table}[H]
+  \centering
+  \caption{Bảng phân công công việc của Trình Quốc An (tuần 1--3)}
+  \label{tab:work_assignment_an_1}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabularx}{\textwidth}{@{}p{3.6cm}p{1.4cm}X p{1.1cm}@{}}
+    \toprule
+    \textbf{Họ tên} & \textbf{Tuần} & \textbf{Nội dung công việc} & \textbf{\%} \\
+    \midrule
+    Trình Quốc An & Tuần 1 &
+    \begin{itemize}[nosep, leftmargin=*]
+      \item Sử dụng dataset có sẵn trên roboflow (7500 bức ảnh, 2 class: fall/nofall), áp dụng preprocessing và augmentation, tải dataset về để train
+      \item Giảm bộ dữ liệu xuống còn 2000 ảnh (1k fall/1k no fall), áp dụng thêm các preprocessing và augment tạo ra được dataset 4200 ảnh, chia train/val/test: 70/20/10. Tải dataset về và tiến hành train
+    \end{itemize}
+    & 100\% \\
+    \addlinespace
+    Trình Quốc An & Tuần 2 &
+    \begin{itemize}[nosep, leftmargin=*]
+      \item Đổi sang bộ dataset keypoint với 7775 ảnh. 6 labels: falling (2322), sitting (2000), sleeping(2422), standing(2246), walking(2570), waving hands(96).
+      \item Sử dụng roboflow để áp dụng preprocessing: resize to 640x640, áp dụng Auto-Orient
+      \item Áp dụng các augmentation cho tập train (hue, saturation, brightness, exposure, blur, noise)
+      \item Chia train/val/test là 70/20/10 và tải dataset về fine-tunning từ yolov11n-pose.pt trên Colab (train lần 1)
+    \end{itemize}
+    & 100\% \\
+    \addlinespace
+    Trình Quốc An & Tuần 3 &
+    \begin{itemize}[nosep, leftmargin=*]
+      \item Đổi sang bộ dataset keypoint với 7775 ảnh. 6 labels: falling (2322), sitting (2000), sleeping(2422), standing(2246), walking(2570), waving hands(96).
+      \item Chia train/val/test là 70/20/10 và tải dataset về fine-tunning từ yolov11n-pose.pt trên Colab (train lần 1)
+    \end{itemize}
+    & 100\% \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Bảng phân công công việc của Trình Quốc An (tuần 4--5)}
+  \label{tab:work_assignment_an_2}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabularx}{\textwidth}{@{}p{3.6cm}p{1.4cm}X p{1.1cm}@{}}
+    \toprule
+    \textbf{Họ tên} & \textbf{Tuần} & \textbf{Nội dung công việc} & \textbf{\%} \\
+    \midrule
+    \addlinespace
+    Trình Quốc An & Tuần 4 &
+    \begin{itemize}[nosep, leftmargin=*]
+      \item Viết script mapping 5 class sang 2 class: fall, no\_fall
+      \item Bổ sung ảnh cho class fall
+    \end{itemize}
+    & 100\% \\
+    \addlinespace
+    Trình Quốc An & Tuần 5 &
+    \begin{itemize}[nosep, leftmargin=*]
+      \item Xử lý dataleak train-val, train-test
+      \item Train lại trên dataset clean
+    \end{itemize}
+    & 100\% \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[H]
+  \centering
+  \caption{Bảng phân công công việc của Nguyễn Huy Hoàng}
+  \label{tab:work_assignment_hoang}
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabularx}{\textwidth}{@{}p{3.6cm}p{1.4cm}X p{1.1cm}@{}}
+    \toprule
+    \textbf{Họ tên} & \textbf{Tuần} & \textbf{Nội dung công việc} & \textbf{\%} \\
+    \midrule
+    Nguyễn Huy Hoàng & Tuần 1 &
+    Tìm hiểu lý thuyết và cách sử dụng yolov8, và train trên google colab sử dụng model yolov8n
+    & 100\% \\
+    \addlinespace
+    Nguyễn Huy Hoàng & Tuần 2 &
+    Tìm hiểu các chức năng của Computer Vision(phương pháp phi tiếp xúc (non-intrusive)), xây dựng mô hình để có độ chính xác cao hơn, YOLOv11 và phạm vi ảnh của camera thông thường
+    & 100\% \\
+    \addlinespace
+    Nguyễn Huy Hoàng & Tuần 3 &
+    Sửa một số ảnh bị gán nhãn sai trong bộ dataset trên
+    & 100\% \\
+    \addlinespace
+    Nguyễn Huy Hoàng & Tuần 4 &
+    Label ảnh trên roboflow, viết lí thuyết khái niệm của YOLO
+    & 100\% \\
+    \addlinespace
+    Nguyễn Huy Hoàng & Tuần 5 &
+    Label ảnh và viết báo cáo
+    & 100\% \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\section{Mã nguồn}
+
+Mã nguồn của đề tài được lưu tại repository GitHub:
+\begin{center}
+  \url{https://github.com/quocan9999/fall-detection}
+\end{center}
 
 % ============================================================
 %  TÀI LIỆU THAM KHẢO

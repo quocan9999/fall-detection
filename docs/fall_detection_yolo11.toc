@@ -38,31 +38,34 @@
 \contentsline {subsubsection}{\numberline {2.9.3}Object keypoint similarity (OKS)}{13}{subsubsection.2.9.3}%
 \contentsline {section}{\numberline {3}Dataset}{14}{section.3}%
 \contentsline {subsection}{\numberline {3.1}Mô tả dataset}{14}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Cấu trúc thư mục và file cấu hình}{14}{subsection.3.2}%
-\contentsline {subsection}{\numberline {3.3}Định dạng annotation - YOLO keypoint}{15}{subsection.3.3}%
-\contentsline {subsection}{\numberline {3.4}Phân tích và thống kê dataset}{16}{subsection.3.4}%
-\contentsline {subsection}{\numberline {3.5}Tiền xử lý và data augmentation}{17}{subsection.3.5}%
-\contentsline {subsubsection}{\numberline {3.5.1}Tiền xử lý}{17}{subsubsection.3.5.1}%
-\contentsline {subsubsection}{\numberline {3.5.2}Data augmentation cho keypoint data}{17}{subsubsection.3.5.2}%
-\contentsline {section}{\numberline {4}Pipeline fine-tune}{18}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Tổng quan pipeline}{18}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Cấu hình thực nghiệm}{18}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}Môi trường}{18}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}Hyperparameters}{20}{subsubsection.4.2.2}%
-\contentsline {subsubsection}{\numberline {4.2.3}Code fine-tune}{21}{subsubsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.3}Chiến lược fine-tune}{22}{subsection.4.3}%
-\contentsline {subsubsection}{\numberline {4.3.1}Fine-tune toàn bộ mô hình}{22}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Giám sát trọng số và dừng sớm}{23}{subsubsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.4}Chi tiết tiến trình và quá trình huấn luyện}{23}{subsection.4.4}%
-\contentsline {section}{\numberline {5}Thực nghiệm và kết quả}{24}{section.5}%
-\contentsline {subsection}{\numberline {5.1}Kết quả huấn luyện và sự hội tụ}{24}{subsection.5.1}%
-\contentsline {subsubsection}{\numberline {5.1.1}Phân tích đồ thị loss}{24}{subsubsection.5.1.1}%
-\contentsline {subsubsection}{\numberline {5.1.2}Phân tích metric trên tập validation}{25}{subsubsection.5.1.2}%
-\contentsline {subsection}{\numberline {5.2}Kết quả đánh giá định lượng trên tập kiểm thử độc lập}{25}{subsection.5.2}%
-\contentsline {subsubsection}{\numberline {5.2.1}Phân tích đường cong precision-recall}{26}{subsubsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.3}Phân tích định tính và kết quả thử nghiệm inference trực quan}{27}{subsection.5.3}%
-\contentsline {subsection}{\numberline {5.4}Phân tích chi tiết lỗi}{28}{subsection.5.4}%
-\contentsline {section}{\numberline {6}Kết luận và hướng phát triển}{29}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Kết luận}{29}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Hạn chế}{30}{subsection.6.2}%
-\contentsline {subsection}{\numberline {6.3}Hướng phát triển}{30}{subsection.6.3}%
+\contentsline {subsection}{\numberline {3.2}Quy trình xử lý dataset gốc}{14}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Cấu trúc thư mục và file cấu hình}{15}{subsection.3.3}%
+\contentsline {subsection}{\numberline {3.4}Định dạng annotation - YOLO keypoint}{16}{subsection.3.4}%
+\contentsline {subsection}{\numberline {3.5}Phân tích và thống kê dataset}{17}{subsection.3.5}%
+\contentsline {subsection}{\numberline {3.6}Tiền xử lý và data augmentation}{18}{subsection.3.6}%
+\contentsline {subsubsection}{\numberline {3.6.1}Tiền xử lý}{18}{subsubsection.3.6.1}%
+\contentsline {subsubsection}{\numberline {3.6.2}Data augmentation cho keypoint data}{18}{subsubsection.3.6.2}%
+\contentsline {section}{\numberline {4}Pipeline fine-tune}{19}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Tổng quan pipeline}{19}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Cấu hình thực nghiệm}{20}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Môi trường}{20}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Hyperparameters}{21}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}Code fine-tune}{22}{subsubsection.4.2.3}%
+\contentsline {subsection}{\numberline {4.3}Chiến lược fine-tune}{23}{subsection.4.3}%
+\contentsline {subsubsection}{\numberline {4.3.1}Fine-tune toàn bộ mô hình}{23}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {4.3.2}Giám sát trọng số và dừng sớm}{24}{subsubsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.4}Chi tiết tiến trình và quá trình huấn luyện}{24}{subsection.4.4}%
+\contentsline {section}{\numberline {5}Thực nghiệm và kết quả}{25}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Kết quả huấn luyện và sự hội tụ}{25}{subsection.5.1}%
+\contentsline {subsubsection}{\numberline {5.1.1}Phân tích đồ thị loss}{25}{subsubsection.5.1.1}%
+\contentsline {subsubsection}{\numberline {5.1.2}Phân tích metric trên tập validation}{26}{subsubsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.2}Kết quả đánh giá định lượng trên tập kiểm thử độc lập}{26}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}Phân tích đường cong precision-recall}{27}{subsubsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.3}Phân tích định tính và kết quả thử nghiệm inference trực quan}{28}{subsection.5.3}%
+\contentsline {subsection}{\numberline {5.4}Phân tích chi tiết lỗi}{29}{subsection.5.4}%
+\contentsline {section}{\numberline {6}Kết luận và hướng phát triển}{30}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Kết luận}{30}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Hạn chế}{31}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Hướng phát triển}{31}{subsection.6.3}%
+\contentsline {section}{\numberline {A}Phân công công việc}{32}{appendix.A}%
+\contentsline {section}{\numberline {B}Mã nguồn}{33}{appendix.B}%
